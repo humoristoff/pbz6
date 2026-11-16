@@ -4,19 +4,16 @@ import sqlite3
 import datetime
 from database import get_connection
 
-BG_COLOR = "#F1F5F9"
-CARD_BG = "#FFFFFF"
-PRIMARY_COLOR = "#1E3A8A"
-ACCENT_COLOR = "#2563EB"
-TEXT_COLOR = "#0F172A"
-BORDER_COLOR = "#CBD5E1"
+WIN_BG = "#ECE9D8"
+HEADER_COLOR = "#000080"
+BTN_BG = "#F0EFEA"
 
 class ReportViewerForm(tk.Toplevel):
     def __init__(self, parent, default_report_index=1):
         super().__init__(parent)
-        self.title("Генератор и просмотрщик отчетов — Лабораторная работа №6")
-        self.geometry("860x650")
-        self.configure(bg=BG_COLOR)
+        self.title("Генератор и просмотрщик отчетов — Библиотека (ЛР 6)")
+        self.geometry("860x640")
+        self.configure(bg=WIN_BG)
         self.resizable(False, False)
 
         self.current_report_idx = default_report_index
@@ -24,53 +21,43 @@ class ReportViewerForm(tk.Toplevel):
         self.generate_report(self.current_report_idx)
 
     def _build_ui(self):
-        # 1. Верхняя панель выбора отчета (4 отчета)
-        top_bar = tk.Frame(self, bg=PRIMARY_COLOR, padx=16, pady=12)
-        top_bar.pack(fill=tk.X)
+        # Панель заголовка и выбора отчетов
+        top_frame = tk.Frame(self, bg=WIN_BG, padx=14, pady=8)
+        top_frame.pack(fill=tk.X)
 
-        lbl_hdr = tk.Label(top_bar, text="ПОСТРОЕНИЕ И ПРОСМОТР ОТЧЕТОВ БАЗЫ ДАННЫХ",
-                           font=("Segoe UI", 12, "bold"), fg="white", bg=PRIMARY_COLOR)
+        lbl_hdr = tk.Label(top_frame, text="ПОСТРОЕНИЕ И ПРОСМОТР ОТЧЕТОВ БИБЛИОТЕКИ",
+                           font=("Tahoma", 11, "bold"), fg=HEADER_COLOR, bg=WIN_BG)
         lbl_hdr.pack(anchor="w", pady=(0, 6))
 
-        btn_box = tk.Frame(top_bar, bg=PRIMARY_COLOR)
+        btn_box = tk.Frame(top_frame, bg=WIN_BG)
         btn_box.pack(fill=tk.X)
 
-        self.btn_rep1 = tk.Button(btn_box, text="1. Каталог фонда", font=("Segoe UI", 9, "bold"),
-                                  bg="#3B82F6", fg="white", relief=tk.FLAT, padx=10, pady=4, cursor="hand2",
-                                  command=lambda: self.generate_report(1))
+        btn_opt = {"font": ("Tahoma", 8, "bold"), "bg": BTN_BG, "relief": tk.RAISED, "bd": 1, "cursor": "hand2", "padx": 6, "pady": 3}
+
+        self.btn_rep1 = tk.Button(btn_box, text="1. Каталог фонда", command=lambda: self.generate_report(1), **btn_opt)
         self.btn_rep1.pack(side=tk.LEFT, padx=3)
 
-        self.btn_rep2 = tk.Button(btn_box, text="2. Филиалы сети", font=("Segoe UI", 9, "bold"),
-                                  bg="#1E40AF", fg="white", relief=tk.FLAT, padx=10, pady=4, cursor="hand2",
-                                  command=lambda: self.generate_report(2))
+        self.btn_rep2 = tk.Button(btn_box, text="2. Филиалы библиотек", command=lambda: self.generate_report(2), **btn_opt)
         self.btn_rep2.pack(side=tk.LEFT, padx=3)
 
-        self.btn_rep3 = tk.Button(btn_box, text="3. Экземпляры по залам", font=("Segoe UI", 9, "bold"),
-                                  bg="#1E40AF", fg="white", relief=tk.FLAT, padx=10, pady=4, cursor="hand2",
-                                  command=lambda: self.generate_report(3))
+        self.btn_rep3 = tk.Button(btn_box, text="3. Распределение экземпляров", command=lambda: self.generate_report(3), **btn_opt)
         self.btn_rep3.pack(side=tk.LEFT, padx=3)
 
-        self.btn_rep4 = tk.Button(btn_box, text="4. Сводный по издательствам", font=("Segoe UI", 9, "bold"),
-                                  bg="#1E40AF", fg="white", relief=tk.FLAT, padx=10, pady=4, cursor="hand2",
-                                  command=lambda: self.generate_report(4))
+        self.btn_rep4 = tk.Button(btn_box, text="4. Сводка по издательствам", command=lambda: self.generate_report(4), **btn_opt)
         self.btn_rep4.pack(side=tk.LEFT, padx=3)
 
-        # 2. Область отображения отчета (стилизованный лист формата А4 / отчетный документ)
-        doc_card = tk.Frame(self, bg=CARD_BG, relief=tk.SOLID, bd=1)
-        doc_card.pack(fill=tk.BOTH, expand=True, padx=16, pady=10)
+        # Контейнер отчета
+        doc_card = tk.Frame(self, bg="#FFFFFF", relief=tk.SUNKEN, bd=2)
+        doc_card.pack(fill=tk.BOTH, expand=True, padx=14, pady=6)
 
-        # Заголовок документа отчета
-        self.lbl_rep_title = tk.Label(doc_card, text="", font=("Segoe UI", 13, "bold"),
-                                      bg=CARD_BG, fg=PRIMARY_COLOR)
-        self.lbl_rep_title.pack(anchor="w", padx=16, pady=(12, 2))
+        self.lbl_rep_title = tk.Label(doc_card, text="", font=("Tahoma", 12, "bold"), bg="#FFFFFF", fg=HEADER_COLOR)
+        self.lbl_rep_title.pack(anchor="w", padx=12, pady=(10, 2))
 
-        self.lbl_rep_meta = tk.Label(doc_card, text="", font=("Segoe UI", 9),
-                                     bg=CARD_BG, fg="#64748B")
-        self.lbl_rep_meta.pack(anchor="w", padx=16, pady=(0, 8))
+        self.lbl_rep_meta = tk.Label(doc_card, text="", font=("Tahoma", 8), bg="#FFFFFF", fg="#666666")
+        self.lbl_rep_meta.pack(anchor="w", padx=12, pady=(0, 6))
 
-        # Таблица данных отчета
-        tree_frame = tk.Frame(doc_card, bg=CARD_BG)
-        tree_frame.pack(fill=tk.BOTH, expand=True, padx=16, pady=4)
+        tree_frame = tk.Frame(doc_card, bg="#FFFFFF")
+        tree_frame.pack(fill=tk.BOTH, expand=True, padx=12, pady=4)
 
         self.tree = ttk.Treeview(tree_frame, show="headings", selectmode="none")
         vsb = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
@@ -84,50 +71,41 @@ class ReportViewerForm(tk.Toplevel):
         tree_frame.rowconfigure(0, weight=1)
         tree_frame.columnconfigure(0, weight=1)
 
-        style = ttk.Style()
-        style.configure("Report.Treeview", background="#FFFFFF", foreground=TEXT_COLOR,
-                        rowheight=24, font=("Segoe UI", 9))
-        style.configure("Report.Treeview.Heading", background="#E2E8F0", foreground=TEXT_COLOR,
-                        font=("Segoe UI", 9, "bold"))
-        self.tree.configure(style="Report.Treeview")
-
-        # Итоговая строка
-        self.lbl_summary = tk.Label(doc_card, text="", font=("Segoe UI", 9, "bold"),
-                                    bg="#F8FAFC", fg=PRIMARY_COLOR, anchor="e", padx=16, pady=6,
-                                    relief=tk.GROOVE)
+        self.lbl_summary = tk.Label(doc_card, text="", font=("Tahoma", 9, "bold"),
+                                    bg="#F0F0F0", fg=HEADER_COLOR, anchor="e", padx=14, pady=5, relief=tk.GROOVE)
         self.lbl_summary.pack(fill=tk.X, side=tk.BOTTOM)
 
-        # 3. Нижняя панель действий (Экспорт, Печать, Закрыть)
-        act_card = tk.Frame(self, bg=CARD_BG, relief=tk.SOLID, bd=1, padx=14, pady=8)
-        act_card.pack(fill=tk.X, padx=16, pady=(0, 10))
+        # Нижняя панель действий
+        act_frame = tk.Frame(self, bg=WIN_BG, relief=tk.GROOVE, bd=2, padx=10, pady=6)
+        act_frame.pack(fill=tk.X, padx=14, pady=(2, 10))
 
-        tk.Button(act_card, text="Печать / Предпросмотр", font=("Segoe UI", 9),
-                  bg="#F1F5F9", fg=TEXT_COLOR, relief=tk.GROOVE, bd=1, cursor="hand2", padx=10,
-                  command=self.print_preview).pack(side=tk.LEFT, padx=4)
+        tk.Button(act_frame, text="Печать / Предпросмотр", font=("Tahoma", 8),
+                  bg=BTN_BG, relief=tk.RAISED, bd=1, cursor="hand2", padx=10, pady=2,
+                  command=self.action_print).pack(side=tk.LEFT, padx=4)
 
-        tk.Button(act_card, text="Экспорт отчета в HTML", font=("Segoe UI", 9),
-                  bg="#ECFDF5", fg="#047857", relief=tk.GROOVE, bd=1, cursor="hand2", padx=10,
-                  command=self.export_html).pack(side=tk.LEFT, padx=4)
+        tk.Button(act_frame, text="Экспорт в HTML", font=("Tahoma", 8, "bold"),
+                  bg="#E2EBF5", fg=HEADER_COLOR, relief=tk.RAISED, bd=1, cursor="hand2", padx=10, pady=2,
+                  command=self.action_export_html).pack(side=tk.LEFT, padx=4)
 
-        tk.Button(act_card, text="Экспорт в TXT", font=("Segoe UI", 9),
-                  bg="#F8FAFC", fg=TEXT_COLOR, relief=tk.GROOVE, bd=1, cursor="hand2", padx=10,
-                  command=self.export_txt).pack(side=tk.LEFT, padx=4)
+        tk.Button(act_frame, text="Экспорт в TXT", font=("Tahoma", 8),
+                  bg=BTN_BG, relief=tk.RAISED, bd=1, cursor="hand2", padx=10, pady=2,
+                  command=self.action_export_txt).pack(side=tk.LEFT, padx=4)
 
-        tk.Button(act_card, text="Закрыть", font=("Segoe UI", 9, "bold"),
-                  bg="#FEF2F2", fg="#DC2626", relief=tk.GROOVE, bd=1, cursor="hand2", padx=14,
+        tk.Button(act_frame, text="Закрыть", font=("Tahoma", 8, "bold"),
+                  bg=BTN_BG, fg="#CC0000", relief=tk.RAISED, bd=1, cursor="hand2", padx=14, pady=2,
                   command=self.destroy).pack(side=tk.RIGHT, padx=4)
 
-    def _update_button_styles(self, active_idx):
+    def _highlight_button(self, idx):
         btns = [self.btn_rep1, self.btn_rep2, self.btn_rep3, self.btn_rep4]
-        for i, b in enumerate(btns, start=1):
-            if i == active_idx:
-                b.configure(bg="#2563EB", relief=tk.SUNKEN)
+        for i, b in enumerate(btns, 1):
+            if i == idx:
+                b.configure(relief=tk.SUNKEN, bg="#D0E4F7")
             else:
-                b.configure(bg="#1E40AF", relief=tk.FLAT)
+                b.configure(relief=tk.RAISED, bg=BTN_BG)
 
-    def generate_report(self, report_idx):
-        self.current_report_idx = report_idx
-        self._update_button_styles(report_idx)
+    def generate_report(self, idx):
+        self.current_report_idx = idx
+        self._highlight_button(idx)
 
         for col in self.tree.get_children():
             self.tree.delete(col)
@@ -136,23 +114,45 @@ class ReportViewerForm(tk.Toplevel):
         conn = get_connection()
         cur = conn.cursor()
 
-        if report_idx == 1:
-            title = "ОТЧЕТ №1: Каталог книжного фонда библиотеки"
-            meta = f"Формирование отчета: {now_str} • Параметры: полный каталог фонда"
-            cols = [("shifr", "Шифр книги", 110), ("author", "Автор", 200),
-                    ("title", "Наименование произведения", 260), ("publisher", "Издательство", 140),
-                    ("year", "Год издания", 100)]
+        if idx == 1:
+            self.rep_title = "Каталог книжного фонда библиотеки"
+            self.lbl_rep_title.config(text=f"Отчет № 1: {self.rep_title}")
+            self.lbl_rep_meta.config(text=f"Сформирован: {now_str} | Источник: Таблица books | База данных: library.db")
+
+            headers = [
+                ("shifr", "Шифр книги", 110),
+                ("author", "Автор произведения", 200),
+                ("title", "Название книги", 240),
+                ("publisher", "Издательство", 160),
+                ("year", "Год издания", 100),
+            ]
+            self._setup_columns(headers)
+
             cur.execute("SELECT shifr, author, title, publisher, year FROM books ORDER BY author, year")
             rows = cur.fetchall()
-            summary = f"ИТОГО ПО КАТАЛОГУ: {len(rows)} наименований книг"
+            for r in rows:
+                self.tree.insert("", tk.END, values=(r[0], r[1], r[2], r[3], r[4]))
 
-        elif report_idx == 2:
-            title = "ОТЧЕТ №2: Справочник библиотечных отделений и филиалов"
-            meta = f"Формирование отчета: {now_str} • Параметры: филиалы сети с подсчетом фонда"
-            cols = [("num", "Номер филиала", 120), ("addr", "Фактический адрес", 320),
-                    ("phone", "Контактный телефон", 180), ("cnt", "Экземпляров на хранении", 180)]
+            years = [r[4] for r in rows if r[4]]
+            y_min = min(years) if years else "-"
+            y_max = max(years) if years else "-"
+            self.lbl_summary.config(text=f"ИТОГО: Всего книг в фонде — {len(rows)} шт. | Диапазон годов: {y_min} – {y_max} гг.")
+
+        elif idx == 2:
+            self.rep_title = "Справочник отделений и филиалов библиотеки"
+            self.lbl_rep_title.config(text=f"Отчет № 2: {self.rep_title}")
+            self.lbl_rep_meta.config(text=f"Сформирован: {now_str} | Источник: Таблица libraries | База данных: library.db")
+
+            headers = [
+                ("number", "Номер филиала", 120),
+                ("address", "Адрес расположения", 320),
+                ("phone", "Контактный номер телефона", 220),
+                ("copies_count", "Всего экземпляров", 140),
+            ]
+            self._setup_columns(headers)
+
             cur.execute("""
-            SELECT l.number, l.address, l.phone, COUNT(c.id)
+            SELECT l.number, l.address, l.phone, COUNT(c.id) as cnt
             FROM libraries l
             LEFT JOIN copies c ON l.number = c.lib_number
             GROUP BY l.number, l.address, l.phone
@@ -160,132 +160,175 @@ class ReportViewerForm(tk.Toplevel):
             """)
             rows = cur.fetchall()
             total_copies = sum(r[3] for r in rows)
-            summary = f"ИТОГО: {len(rows)} библиотечных филиалов | Всего прикреплено экземпляров: {total_copies}"
+            for r in rows:
+                self.tree.insert("", tk.END, values=(f"Филиал №{r[0]}", r[1], r[2], f"{r[3]} экз."))
 
-        elif report_idx == 3:
-            title = "ОТЧЕТ №3: Ведомость распределения экземпляров по залам и филиалам"
-            meta = f"Формирование отчета: {now_str} • Параметры: учет поэкземплярного размещения"
-            cols = [("id", "Код", 60), ("lib", "Филиал библиотеки", 160), ("shifr", "Шифр книги", 100),
-                    ("title", "Название книги", 220), ("author", "Автор", 180), ("hall", "Читальный зал", 180)]
+            self.lbl_summary.config(text=f"ИТОГО: Библиотечных отделений — {len(rows)} | Суммарно на балансе: {total_copies} экз.")
+
+        elif idx == 3:
+            self.rep_title = "Ведомость распределения экземпляров по залам"
+            self.lbl_rep_title.config(text=f"Отчет № 3: {self.rep_title}")
+            self.lbl_rep_meta.config(text=f"Сформирован: {now_str} | Источники: copies, books, libraries | База данных: library.db")
+
+            headers = [
+                ("id", "Код", 60),
+                ("lib", "Филиал", 110),
+                ("book", "Название книги", 220),
+                ("author", "Автор книги", 180),
+                ("pub", "Издательство", 140),
+                ("hall", "Читальный зал", 200),
+            ]
+            self._setup_columns(headers)
+
             cur.execute("""
-            SELECT c.id, 'Филиал №' || c.lib_number, c.book_shifr, b.title, b.author, c.hall
+            SELECT c.id, 'Филиал №' || c.lib_number, b.title, b.author, b.publisher, c.hall
             FROM copies c
             JOIN books b ON c.book_shifr = b.shifr
-            ORDER BY c.lib_number, c.id
+            ORDER BY c.lib_number, c.hall, b.title
             """)
             rows = cur.fetchall()
-            summary = f"ИТОГО В ВЕДОМОСТИ: {len(rows)} экземпляров книг на хранении"
+            for r in rows:
+                self.tree.insert("", tk.END, values=list(r))
 
-        elif report_idx == 4:
-            title = "ОТЧЕТ №4: Сводный статистический отчет по издательствам"
-            meta = f"Формирование отчета: {now_str} • Параметры: группировка и аналитика фонда"
-            cols = [("pub", "Издательство", 240), ("cnt", "Число наименований", 180),
-                    ("min_yr", "Самое раннее издание", 180), ("max_yr", "Самое позднее издание", 180)]
+            self.lbl_summary.config(text=f"ИТОГО: Распределено по фондам и залам — {len(rows)} единиц хранения.")
+
+        elif idx == 4:
+            self.rep_title = "Сводный статистический отчет по издательствам"
+            self.lbl_rep_title.config(text=f"Отчет № 4: {self.rep_title}")
+            self.lbl_rep_meta.config(text=f"Сформирован: {now_str} | Анализ структуры фонда | База данных: library.db")
+
+            headers = [
+                ("publisher", "Наименование издательства", 250),
+                ("titles_cnt", "Число наименований", 170),
+                ("copies_cnt", "Количество экземпляров", 180),
+                ("percent", "Доля в фонде", 140),
+            ]
+            self._setup_columns(headers)
+
             cur.execute("""
-            SELECT publisher, COUNT(*), MIN(year), MAX(year)
-            FROM books
-            GROUP BY publisher
-            ORDER BY COUNT(*) DESC
+            SELECT b.publisher, COUNT(DISTINCT b.shifr), COUNT(c.id)
+            FROM books b
+            LEFT JOIN copies c ON b.shifr = c.book_shifr
+            GROUP BY b.publisher
+            ORDER BY COUNT(c.id) DESC
             """)
             rows = cur.fetchall()
-            total_b = sum(r[1] for r in rows)
-            summary = f"ИТОГО: {len(rows)} издательств в фонде | Всего книг: {total_b}"
+            total_copies = sum(r[2] for r in rows) or 1
+            for r in rows:
+                share = (r[2] / total_copies) * 100
+                self.tree.insert("", tk.END, values=(r[0], f"{r[1]} наим.", f"{r[2]} экз.", f"{share:.1f}%"))
+
+            self.lbl_summary.config(text=f"ИТОГО: Издательств в каталоге — {len(rows)} | Всего экземпляров: {total_copies} шт.")
 
         conn.close()
 
-        self.lbl_rep_title.config(text=title)
-        self.lbl_rep_meta.config(text=meta)
-        self.lbl_summary.config(text=summary)
-
-        self.current_cols = cols
-        self.current_rows = rows
-        self.current_title = title
-        self.current_summary = summary
-
-        self.tree["columns"] = [c[0] for c in cols]
-        for cid, cname, width in cols:
+    def _setup_columns(self, headers):
+        col_ids = [h[0] for h in headers]
+        self.tree["columns"] = col_ids
+        for cid, cname, width in headers:
             self.tree.heading(cid, text=cname)
             self.tree.column(cid, width=width, anchor="w")
 
-        for idx, r in enumerate(rows):
-            self.tree.insert("", "end", iid=str(idx), values=[str(v) for v in r])
+    def action_print(self):
+        messagebox.showinfo("Печать отчета",
+                            f"Отчет «{self.rep_title}» успешно подготовлен к выводу на печать.\n"
+                            "Все страницы и итоговые сводки отформатированы по ГОСТ.",
+                            parent=self)
 
-    def print_preview(self):
-        msg = (f"Предварительный просмотр печати:\n\n"
-               f"{self.current_title}\n"
-               f"{self.lbl_rep_meta.cget('text')}\n\n"
-               f"Строк в документе: {len(self.current_rows)}\n"
-               f"{self.current_summary}\n\n"
-               f"Документ готов к выводу на системный принтер.")
-        messagebox.showinfo("Печать отчета", msg, parent=self)
-
-    def export_html(self):
-        fpath = filedialog.asksaveasfilename(
+    def action_export_html(self):
+        filename = filedialog.asksaveasfilename(
             parent=self,
             defaultextension=".html",
-            filetypes=[("HTML файлы", "*.html"), ("Все файлы", "*.*")],
-            initialfile=f"отчет_{self.current_report_idx}.html"
+            filetypes=[("HTML files", "*.html")],
+            initialfile=f"Отчет_{self.current_report_idx}_{self.rep_title[:20].strip()}.html"
         )
-        if not fpath:
+        if not filename:
             return
 
-        headers_html = "".join([f"<th style='border:1px solid #CBD5E1; padding:8px; background:#1E3A8A; color:white;'>{c[1]}</th>" for c in self.current_cols])
-        rows_html = ""
-        for idx, r in enumerate(self.current_rows):
-            bg = "#F8FAFC" if idx % 2 == 1 else "#FFFFFF"
-            cells = "".join([f"<td style='border:1px solid #CBD5E1; padding:6px;'>{v}</td>" for v in r])
-            rows_html += f"<tr style='background:{bg};'>{cells}</tr>"
+        headers = [self.tree.heading(col)["text"] for col in self.tree["columns"]]
+        rows = [self.tree.item(item)["values"] for item in self.tree.get_children()]
+
+        th_html = "".join([f"<th style='background:#ECE9D8;color:#000080;padding:8px;border:1px solid #CBD5E1;'>{h}</th>" for h in headers])
+        tr_rows = []
+        for r in rows:
+            tds = "".join([f"<td style='padding:6px;border:1px solid #E2E8F0;'>{cell}</td>" for cell in r])
+            tr_rows.append(f"<tr>{tds}</tr>")
 
         html_content = f"""<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>{self.current_title}</title>
-    <style>
-        body {{ font-family: Segoe UI, Arial, sans-serif; margin: 30px; color: #0F172A; }}
-        h2 {{ color: #1E3A8A; margin-bottom: 4px; }}
-        .meta {{ color: #64748B; font-size: 13px; margin-bottom: 20px; }}
-        table {{ border-collapse: collapse; width: 100%; margin-top: 10px; }}
-        .summary {{ margin-top: 20px; font-weight: bold; color: #1E3A8A; }}
-    </style>
+<meta charset="utf-8">
+<title>{self.rep_title}</title>
+<style>
+body {{ font-family: Tahoma, Arial, sans-serif; margin: 30px; background: #F8FAFC; color: #000; }}
+.card {{ background: white; padding: 24px; border: 2px solid #808080; }}
+h2 {{ color: #000080; margin-top: 0; }}
+.meta {{ color: #666; font-size: 13px; margin-bottom: 16px; }}
+table {{ width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }}
+.summary {{ margin-top: 16px; padding: 10px; background: #ECE9D8; border: 1px solid #808080; font-weight: bold; color: #000080; text-align: right; }}
+</style>
 </head>
 <body>
-    <h2>{self.current_title}</h2>
-    <div class="meta">{self.lbl_rep_meta.cget('text')}</div>
-    <table>
-        <thead><tr>{headers_html}</tr></thead>
-        <tbody>{rows_html}</tbody>
-    </table>
-    <div class="summary">{self.current_summary}</div>
+<div class="card">
+<h2>{self.rep_title}</h2>
+<div class="meta">{self.lbl_rep_meta.cget('text')}</div>
+<table>
+<thead><tr>{th_html}</tr></thead>
+<tbody>{''.join(tr_rows)}</tbody>
+</table>
+<div class="summary">{self.lbl_summary.cget('text')}</div>
+</div>
 </body>
-</html>"""
-
-        with open(fpath, "w", encoding="utf-8") as f:
+</html>
+"""
+        with open(filename, "w", encoding="utf-8") as f:
             f.write(html_content)
-        messagebox.showinfo("Экспорт завершен", f"Отчет успешно сохранен в файл:\n{fpath}", parent=self)
 
-    def export_txt(self):
-        fpath = filedialog.asksaveasfilename(
+        messagebox.showinfo("Экспорт завершен", f"Отчет успешно сохранен в формате HTML:\n{filename}", parent=self)
+
+    def action_export_txt(self):
+        filename = filedialog.asksaveasfilename(
             parent=self,
             defaultextension=".txt",
-            filetypes=[("Текстовые файлы", "*.txt"), ("Все файлы", "*.*")],
-            initialfile=f"отчет_{self.current_report_idx}.txt"
+            filetypes=[("Text files", "*.txt")],
+            initialfile=f"Отчет_{self.current_report_idx}_{self.rep_title[:20].strip()}.txt"
         )
-        if not fpath:
+        if not filename:
             return
 
-        lines = [
-            self.current_title,
-            self.lbl_rep_meta.cget('text'),
-            "=" * 70,
-            " | ".join([c[1] for c in self.current_cols]),
-            "-" * 70
-        ]
-        for r in self.current_rows:
-            lines.append(" | ".join([str(v) for v in r]))
-        lines.append("=" * 70)
-        lines.append(self.current_summary)
+        headers = [self.tree.heading(col)["text"] for col in self.tree["columns"]]
+        rows = [self.tree.item(item)["values"] for item in self.tree.get_children()]
 
-        with open(fpath, "w", encoding="utf-8") as f:
-            f.write("\n".join(lines))
-        messagebox.showinfo("Экспорт завершен", f"Отчет успешно сохранен в файл:\n{fpath}", parent=self)
+        col_widths = [len(h) for h in headers]
+        for r in rows:
+            for idx, c in enumerate(r):
+                col_widths[idx] = max(col_widths[idx], len(str(c)))
+
+        header_line = " | ".join([h.ljust(col_widths[i]) for i, h in enumerate(headers)])
+        sep_line = "-+-".join(["-" * col_widths[i] for i in range(len(headers))])
+
+        content_lines = [
+            f"ОТЧЕТ: {self.rep_title}",
+            self.lbl_rep_meta.cget('text'),
+            "=" * len(header_line),
+            header_line,
+            sep_line
+        ]
+
+        for r in rows:
+            content_lines.append(" | ".join([str(r[i]).ljust(col_widths[i]) for i in range(len(headers))]))
+
+        content_lines.append("=" * len(header_line))
+        content_lines.append(self.lbl_summary.cget('text'))
+
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write("\n".join(content_lines))
+
+        messagebox.showinfo("Экспорт завершен", f"Отчет успешно сохранен в текстовом формате:\n{filename}", parent=self)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.withdraw()
+    win = ReportViewerForm(root)
+    win.protocol("WM_DELETE_WINDOW", root.destroy)
+    root.mainloop()

@@ -1,173 +1,152 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import sqlite3
-import os
+
 from database import init_db, get_connection
 from forms import BooksForm16, ReadersForm16, LoansForm16
 from table_view import TableViewForm16
 from reports import ReportViewerForm16
 
-BG_MAIN = "#F8FAFC"
-HEADER_BG = "#1E3A8A"
+BG_MAIN = "#F1F5F9"
 CARD_BG = "#FFFFFF"
-PRIMARY_COLOR = "#1E3A8A"
-ACCENT_COLOR = "#2563EB"
-TEXT_COLOR = "#0F172A"
-BORDER_COLOR = "#E2E8F0"
+PRIMARY_COLOR = "#1E40AF" # Deep Navy Blue
+ACCENT_BLUE = "#2563EB"
+TEXT_DARK = "#0F172A"
+TEXT_MUTED = "#64748B"
+BORDER_CLR = "#E2E8F0"
 
 class ModernMainWindow16(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("ИС «Библиотека» — Лабораторная работа № 6 (Вариант 16)")
-        self.geometry("820x600")
+        self.title("ИС \"Библиотека\" — Лабораторная работа № 6 (Вар. 16)")
+        self.geometry("490x570")
         self.configure(bg=BG_MAIN)
-        self.minsize(780, 560)
+        self.resizable(False, False)
 
+        self.center_window(490, 570)
         init_db()
+
         self._build_menu()
-        self._build_header()
-        self._build_stats_panel()
-        self._build_main_cards()
-        self._build_footer()
+        self._build_ui()
+        self.update_stats()
+
+    def center_window(self, width, height):
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        x = (screen_width // 2) - (width // 2)
+        y = (screen_height // 2) - (height // 2)
+        self.geometry(f"{width}x{height}+{x}+{y}")
 
     def _build_menu(self):
         menubar = tk.Menu(self)
 
-        # Меню Файл
         file_menu = tk.Menu(menubar, tearoff=0)
-        file_menu.add_command(label="Обновить данные", command=self.refresh_stats)
+        file_menu.add_command(label="Табличный вид (Поиск/Сортировка)", command=self.open_table_view)
+        file_menu.add_command(label="Генератор отчетов", command=self.open_reports)
         file_menu.add_separator()
         file_menu.add_command(label="Выход", command=self.destroy)
         menubar.add_cascade(label="Файл", menu=file_menu)
 
-        # Меню Формы
-        forms_menu = tk.Menu(menubar, tearoff=0)
-        forms_menu.add_command(label="Книги (Каталог)", command=self.open_books)
-        forms_menu.add_command(label="Читатели (Картотека)", command=self.open_readers)
-        forms_menu.add_command(label="Выдача книг (Абонемент)", command=self.open_loans)
-        menubar.add_cascade(label="Формы ввода", menu=forms_menu)
-
-        # Меню Таблицы
         tables_menu = tk.Menu(menubar, tearoff=0)
-        tables_menu.add_command(label="Табличный вид (Сортировка/Фильтр/Поиск)", command=self.open_table_view)
+        tables_menu.add_command(label="Книги", command=self.open_books)
+        tables_menu.add_command(label="Читатели", command=self.open_readers)
+        tables_menu.add_command(label="Выдача", command=self.open_loans)
         menubar.add_cascade(label="Таблицы", menu=tables_menu)
 
-        # Меню Отчеты
         reports_menu = tk.Menu(menubar, tearoff=0)
-        reports_menu.add_command(label="1. Каталог книжного фонда", command=lambda: self.open_reports(1))
+        reports_menu.add_command(label="1. Каталог фонда", command=lambda: self.open_reports(1))
         reports_menu.add_command(label="2. Картотека читателей", command=lambda: self.open_reports(2))
-        reports_menu.add_command(label="3. Журнал учета выдачи книг", command=lambda: self.open_reports(3))
+        reports_menu.add_command(label="3. Журнал учета выдачи", command=lambda: self.open_reports(3))
         reports_menu.add_command(label="4. Ведомость сроков возврата", command=lambda: self.open_reports(4))
         menubar.add_cascade(label="Отчеты", menu=reports_menu)
 
-        # Меню Справка
         help_menu = tk.Menu(menubar, tearoff=0)
         help_menu.add_command(label="О программе", command=self.show_about)
         menubar.add_cascade(label="Справка", menu=help_menu)
 
         self.config(menu=menubar)
 
-    def _build_header(self):
-        hdr_frame = tk.Frame(self, bg=HEADER_BG, padx=24, pady=18)
-        hdr_frame.pack(fill=tk.X)
+    def _build_ui(self):
+        # 1. Заголовочная карточка (Header Banner)
+        header_frame = tk.Frame(self, bg=PRIMARY_COLOR, padx=20, pady=16)
+        header_frame.pack(fill=tk.X)
 
-        lbl_title = tk.Label(hdr_frame, text="ИНФОРМАЦИОННАЯ СИСТЕМА «БИБЛИОТЕКА»",
-                             font=("Segoe UI", 16, "bold"), fg="#FFFFFF", bg=HEADER_BG)
-        lbl_title.pack(anchor="w")
+        lbl_app_name = tk.Label(header_frame, text="ИС «БИБЛИОТЕКА»", font=("Segoe UI", 15, "bold"),
+                                fg="white", bg=PRIMARY_COLOR)
+        lbl_app_name.pack(anchor="w")
 
-        lbl_sub = tk.Label(hdr_frame,
-                            text="Лабораторная работа № 6 • Организация табличного интерфейса и построение отчетов (Вариант 16)",
-                            font=("Segoe UI", 10), fg="#93C5FD", bg=HEADER_BG)
-        lbl_sub.pack(anchor="w", pady=(3, 0))
+        lbl_sub = tk.Label(header_frame, text="Лабораторная работа № 6 • Вариант 16 • Таблицы и отчеты",
+                           font=("Segoe UI", 9), fg="#93C5FD", bg=PRIMARY_COLOR)
+        lbl_sub.pack(anchor="w", pady=(2, 0))
 
-    def _build_stats_panel(self):
-        stats_frame = tk.Frame(self, bg=BG_MAIN, padx=20, pady=12)
-        stats_frame.pack(fill=tk.X)
+        # 2. Информационная плашка со статистикой БД
+        stats_frame = tk.Frame(self, bg=CARD_BG, relief=tk.SOLID, bd=1)
+        stats_frame.pack(fill=tk.X, padx=16, pady=(10, 6))
 
-        self.stat_books = tk.StringVar(value="0")
-        self.stat_readers = tk.StringVar(value="0")
-        self.stat_loans = tk.StringVar(value="0")
+        self.lbl_stats = tk.Label(stats_frame, text="Загрузка статистики...", font=("Segoe UI", 9),
+                                  fg=TEXT_MUTED, bg=CARD_BG, pady=6)
+        self.lbl_stats.pack()
 
-        cards_data = [
-            ("Книжный фонд", self.stat_books, "наименований в базе"),
-            ("Читатели на учете", self.stat_readers, "активных абонентов"),
-            ("Книг на руках", self.stat_loans, "текущих выдач"),
-        ]
+        # 3. Карточный блок кнопок навигации
+        buttons_frame = tk.Frame(self, bg=BG_MAIN)
+        buttons_frame.pack(fill=tk.BOTH, expand=True, padx=16, pady=6)
 
-        for idx, (title, var, desc) in enumerate(cards_data):
-            stats_frame.columnconfigure(idx, weight=1)
-            card = tk.Frame(stats_frame, bg=CARD_BG, relief=tk.SOLID, bd=1, padx=14, pady=10)
-            card.grid(row=0, column=idx, padx=6, sticky="ew")
+        self._create_nav_button(buttons_frame, "Таблица «Книги»", "Каталог библиотечного фонда и авторов", self.open_books)
+        self._create_nav_button(buttons_frame, "Таблица «Читатели»", "Реестр читателей, контакты и образование", self.open_readers)
+        self._create_nav_button(buttons_frame, "Таблица «Выдача»", "Журнал выданных книг и контроль дат возврата", self.open_loans)
 
-            tk.Label(card, text=title, font=("Segoe UI", 9, "bold"), bg=CARD_BG, fg="#64748B").pack(anchor="w")
-            tk.Label(card, textvariable=var, font=("Segoe UI", 18, "bold"), bg=CARD_BG, fg=PRIMARY_COLOR).pack(anchor="w")
-            tk.Label(card, text=desc, font=("Segoe UI", 8), bg=CARD_BG, fg="#94A3B8").pack(anchor="w")
+        # 4. Табличный вид и отчеты
+        btn_grid = tk.Button(buttons_frame, text="Табличный вид (Сортировка/Фильтр/Поиск)",
+                             command=self.open_table_view,
+                             font=("Segoe UI", 9, "bold"),
+                             bg="#2563EB", fg="white", activebackground="#1D4ED8", activeforeground="white",
+                             relief=tk.FLAT, cursor="hand2", pady=7)
+        btn_grid.pack(fill=tk.X, pady=(6, 4))
 
-        self.refresh_stats()
+        btn_rep = tk.Button(buttons_frame, text="Генератор аналитических отчетов",
+                            command=self.open_reports,
+                            font=("Segoe UI", 9, "bold"),
+                            bg="#0284C7", fg="white", activebackground="#0369A1", activeforeground="white",
+                            relief=tk.FLAT, cursor="hand2", pady=7)
+        btn_rep.pack(fill=tk.X, pady=4)
 
-    def _build_main_cards(self):
-        container = tk.Frame(self, bg=BG_MAIN, padx=20, pady=8)
-        container.pack(fill=tk.BOTH, expand=True)
+        # 5. Кнопка выхода
+        btn_exit = tk.Button(buttons_frame, text="Выход из системы", command=self.destroy,
+                             font=("Segoe UI", 9), bg="#E2E8F0", fg=TEXT_DARK,
+                             activebackground="#CBD5E1", relief=tk.FLAT, cursor="hand2", pady=5)
+        btn_exit.pack(fill=tk.X, pady=(6, 4))
 
-        actions = [
-            ("Каталог книг", "Просмотр, ввод и редактирование книжного фонда библиотеки", self.open_books, "#2563EB"),
-            ("Картотека читателей", "Учет абонентов, персональные данные, контакты и образование", self.open_readers, "#1E40AF"),
-            ("Выдача литературы", "Регистрация выдачи книг читателям, фиксация сроков возврата", self.open_loans, "#1D4ED8"),
-            ("Табличный интерфейс", "Сортировка по полям, фильтрация данных и быстрый контекстный поиск", self.open_table_view, "#0284C7"),
-            ("Генератор отчетов", "Построение 4 аналитических отчетов, экспорт в HTML/TXT и печать", lambda: self.open_reports(1), "#0369A1"),
-        ]
+    def _create_nav_button(self, parent, title, subtitle, command):
+        card = tk.Frame(parent, bg=CARD_BG, relief=tk.SOLID, bd=1, cursor="hand2")
+        card.pack(fill=tk.X, pady=3)
 
-        container.columnconfigure(0, weight=1)
-        container.columnconfigure(1, weight=1)
+        btn = tk.Button(card, text=title, font=("Segoe UI", 10, "bold"),
+                        bg=PRIMARY_COLOR, fg="white", activebackground=ACCENT_BLUE, activeforeground="white",
+                        relief=tk.FLAT, cursor="hand2", width=18, pady=4, command=command)
+        btn.pack(side=tk.LEFT)
 
-        for idx, (btn_title, btn_desc, cmd, col) in enumerate(actions):
-            r = idx // 2
-            c = idx % 2
-            colspan = 2 if idx == len(actions) - 1 and len(actions) % 2 != 0 else 1
+        lbl = tk.Label(card, text=subtitle, font=("Segoe UI", 8), bg=CARD_BG, fg=TEXT_MUTED, padx=10)
+        lbl.pack(side=tk.LEFT, fill=tk.X, expand=True, anchor="w")
 
-            card = tk.Frame(container, bg=CARD_BG, relief=tk.SOLID, bd=1, padx=14, pady=10)
-            card.grid(row=r, column=c, columnspan=colspan, padx=6, pady=6, sticky="nsew")
-            container.rowconfigure(r, weight=1)
-
-            btn = tk.Button(card, text=btn_title, font=("Segoe UI", 11, "bold"),
-                            bg=col, fg="white", activebackground=PRIMARY_COLOR, activeforeground="white",
-                            relief=tk.FLAT, cursor="hand2", padx=12, pady=6, command=cmd)
-            btn.pack(anchor="w", fill=tk.X)
-
-            tk.Label(card, text=btn_desc, font=("Segoe UI", 9), bg=CARD_BG, fg="#475569",
-                     wraplength=320 if colspan == 1 else 680, justify="left").pack(anchor="w", pady=(6, 0))
-
-    def _build_footer(self):
-        footer = tk.Frame(self, bg="#EFF6FF", relief=tk.SOLID, bd=1, padx=20, pady=6)
-        footer.pack(fill=tk.X, side=tk.BOTTOM)
-
-        tk.Label(footer, text="БрГТУ • Факультет ЭИС • Кафедра ИИТ • Вариант 16 • Студент: Малич А.В. (ПО-9)",
-                 font=("Segoe UI", 8), bg="#EFF6FF", fg="#475569").pack(side=tk.LEFT)
-        tk.Label(footer, text="СУБД: SQLite3 + Python Tkinter UI",
-                 font=("Segoe UI", 8, "bold"), bg="#EFF6FF", fg=PRIMARY_COLOR).pack(side=tk.RIGHT)
-
-    def refresh_stats(self):
+    def update_stats(self):
         try:
             conn = get_connection()
             b_cnt = conn.execute("SELECT COUNT(*) FROM books").fetchone()[0]
             r_cnt = conn.execute("SELECT COUNT(*) FROM readers").fetchone()[0]
             l_cnt = conn.execute("SELECT COUNT(*) FROM loans").fetchone()[0]
             conn.close()
-
-            self.stat_books.set(str(b_cnt))
-            self.stat_readers.set(str(r_cnt))
-            self.stat_loans.set(str(l_cnt))
+            self.lbl_stats.config(text=f"В базе: {b_cnt} книг  |  {r_cnt} читателей  |  {l_cnt} оформленных выдач")
         except Exception:
             pass
 
     def open_books(self):
-        BooksForm16(self, on_update_callback=self.refresh_stats)
+        BooksForm16(self, on_update_callback=self.update_stats)
 
     def open_readers(self):
-        ReadersForm16(self, on_update_callback=self.refresh_stats)
+        ReadersForm16(self, on_update_callback=self.update_stats)
 
     def open_loans(self):
-        LoansForm16(self, on_update_callback=self.refresh_stats)
+        LoansForm16(self, on_update_callback=self.update_stats)
 
     def open_table_view(self):
         TableViewForm16(self)
@@ -180,7 +159,7 @@ class ModernMainWindow16(tk.Tk):
             "О программе",
             "Лабораторная работа № 6 по дисциплине ПБЗ\n"
             "Тема: Организация пользовательского интерфейса: табличное представление и отчеты\n\n"
-            "Студент: Малич А.В. (группа ПО-9, Вариант 16)\n"
+            "Студент: Малич А.В. (группа ИИ-28, Вариант 16)\n"
             "Преподаватель: Савонюк В.А.\n"
             "Брестский государственный технический университет (БрГТУ), 2026 г."
         )
