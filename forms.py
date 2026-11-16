@@ -13,7 +13,7 @@ class BaseRecordForm(tk.Toplevel):
     def __init__(self, parent, title, table_name, fields_config, on_update_callback=None):
         super().__init__(parent)
         self.title(title)
-        self.geometry("740x510")
+        self.geometry("780x520")
         self.configure(bg=WIN_BG)
         self.resizable(False, False)
 
@@ -122,7 +122,7 @@ class BaseRecordForm(tk.Toplevel):
         ]
 
         for col_idx, (btext, bcmd, is_bold) in enumerate(buttons):
-            btn_row.columnconfigure(col_idx, weight=1)
+            btn_row.columnconfigure(col_idx, weight=1, uniform="nav_btn")
             f_weight = "bold" if is_bold else "normal"
             tk.Button(
                 btn_row,
@@ -131,7 +131,7 @@ class BaseRecordForm(tk.Toplevel):
                 bg=BTN_BG,
                 font=("Tahoma", 9, f_weight),
                 relief=tk.RAISED,
-                bd=1,
+                bd=2,
                 cursor="hand2",
                 pady=4
             ).grid(row=0, column=col_idx, padx=3, sticky="ew")

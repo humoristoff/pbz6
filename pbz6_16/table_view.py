@@ -17,13 +17,14 @@ class TableViewForm16(tk.Toplevel):
     def __init__(self, parent, initial_table="books"):
         super().__init__(parent)
         self.title("Табличный вид — Сортировка, фильтрация и поиск (ЛР 6)")
-        self.geometry("940x650")
+        self.geometry("980x660")
         self.configure(bg=BG_COLOR)
         self.resizable(False, False)
 
         self.current_table = initial_table
         self.raw_rows = []
         self.filtered_rows = []
+        self.sort_direction = "ASC"
 
         self._init_table_configs()
         self._build_ui()
@@ -35,9 +36,9 @@ class TableViewForm16(tk.Toplevel):
                 "title": "Таблица «Книги» (Табличный вид)",
                 "columns": [
                     ("shifr", "Шифр книги", 100),
-                    ("author", "Автор", 180),
-                    ("title", "Название книги", 220),
-                    ("publisher", "Издательство", 140),
+                    ("author", "Автор", 185),
+                    ("title", "Название книги", 225),
+                    ("publisher", "Издательство", 145),
                     ("year", "Год издания", 90),
                 ],
                 "filter_col": "author",
@@ -49,8 +50,8 @@ class TableViewForm16(tk.Toplevel):
                 "title": "Таблица «Читатели» (Табличный вид)",
                 "columns": [
                     ("reader_id", "Номер билета", 100),
-                    ("full_name", "ФИО читателя", 190),
-                    ("address", "Адрес проживания", 230),
+                    ("full_name", "ФИО читателя", 195),
+                    ("address", "Адрес проживания", 235),
                     ("phone", "Телефон", 140),
                     ("education", "Образование", 110),
                 ],
@@ -63,8 +64,8 @@ class TableViewForm16(tk.Toplevel):
                 "title": "Таблица «Выдача книг» (Табличный вид)",
                 "columns": [
                     ("id", "ID", 60),
-                    ("reader_name", "ФИО читателя", 180),
-                    ("book_title", "Название книги", 210),
+                    ("reader_name", "ФИО читателя", 185),
+                    ("book_title", "Название книги", 215),
                     ("issue_date", "Дата выдачи", 110),
                     ("return_date", "Срок возврата", 110),
                 ],
@@ -82,7 +83,7 @@ class TableViewForm16(tk.Toplevel):
         }
 
     def _build_ui(self):
-        # Переключатель таблиц вверху
+        # 1. Переключатель таблиц вверху
         nav_top = tk.Frame(self, bg=BG_COLOR, padx=16, pady=8)
         nav_top.pack(fill=tk.X)
 
@@ -96,18 +97,21 @@ class TableViewForm16(tk.Toplevel):
                                 command=self._on_table_switch)
             rb.pack(side=tk.LEFT, padx=6)
 
-        # Заголовок таблицы
+        # 2. Заголовок таблицы
         self.lbl_title = tk.Label(self, text="Таблица (Табличный вид)", font=("Segoe UI", 13, "bold"),
                                   fg=PRIMARY_COLOR, bg=BG_COLOR)
         self.lbl_title.pack(anchor="w", padx=16, pady=(4, 6))
 
-        # Основной центральный контейнер
+        # 3. Основной центральный контейнер с надежной сеткой (grid)
         main_box = tk.Frame(self, bg=BG_COLOR)
         main_box.pack(fill=tk.BOTH, expand=True, padx=16, pady=4)
+        main_box.columnconfigure(0, weight=1)
+        main_box.columnconfigure(1, weight=0, minsize=295)
+        main_box.rowconfigure(0, weight=1)
 
-        # Левая часть: DataGridView
+        # Левая часть: DataGridView (Treeview)
         grid_frame = tk.Frame(main_box, bg=CARD_BG, relief=tk.SOLID, bd=1)
-        grid_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
+        grid_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 14))
 
         self.tree = ttk.Treeview(grid_frame, show="headings", selectmode="browse")
         vsb = ttk.Scrollbar(grid_frame, orient="vertical", command=self.tree.yview)
@@ -124,21 +128,19 @@ class TableViewForm16(tk.Toplevel):
         self.tree.tag_configure("highlight", background=HIGHLIGHT_BG, foreground=HIGHLIGHT_FG)
         self.tree.tag_configure("normal", background="#FFFFFF", foreground=TEXT_COLOR)
 
-        # Правая часть: Блок Сортировки (GroupBox)
-        right_box = tk.Frame(main_box, bg=BG_COLOR, width=280)
-        right_box.pack(side=tk.RIGHT, fill=tk.Y)
+        # Правая часть: Блок Сортировки (фиксированная ширина 295px)
+        sort_group = tk.LabelFrame(main_box, text="Сортировка", font=("Segoe UI", 9, "bold"),
+                                   bg=CARD_BG, fg=PRIMARY_COLOR, padx=14, pady=10, relief=tk.SOLID, bd=1, width=295)
+        sort_group.grid(row=0, column=1, sticky="nsew")
+        sort_group.grid_propagate(False)
 
-        sort_group = tk.LabelFrame(right_box, text="Сортировка", font=("Segoe UI", 9, "bold"),
-                                   bg=CARD_BG, fg=PRIMARY_COLOR, padx=10, pady=8, relief=tk.SOLID, bd=1)
-        sort_group.pack(fill=tk.X, pady=(0, 10))
-
-        tk.Label(sort_group, text="Поле для сортировки:", font=("Segoe UI", 9),
+        tk.Label(sort_group, text="Поле для сортировки:", font=("Segoe UI", 9, "bold"),
                  bg=CARD_BG, fg=TEXT_COLOR, anchor="w").pack(fill=tk.X, pady=(0, 4))
 
         list_frame = tk.Frame(sort_group, bg=CARD_BG)
-        list_frame.pack(fill=tk.X, pady=(0, 6))
+        list_frame.pack(fill=tk.X, pady=(0, 8))
 
-        self.listbox = tk.Listbox(list_frame, height=5, font=("Segoe UI", 9),
+        self.listbox = tk.Listbox(list_frame, height=6, font=("Segoe UI", 9),
                                   selectmode=tk.SINGLE, relief=tk.SOLID, bd=1)
         lb_vsb = ttk.Scrollbar(list_frame, orient="vertical", command=self.listbox.yview)
         self.listbox.configure(yscrollcommand=lb_vsb.set)
@@ -147,21 +149,32 @@ class TableViewForm16(tk.Toplevel):
 
         self.listbox.bind("<<ListboxSelect>>", self._on_listbox_select)
 
-        self.sort_dir_var = tk.StringVar(value="ASC")
-        rb_asc = tk.Radiobutton(sort_group, text="Сортировка по возрастанию", value="ASC",
-                                variable=self.sort_dir_var, font=("Segoe UI", 8),
-                                bg=CARD_BG, activebackground=CARD_BG)
-        rb_asc.pack(anchor="w", pady=1)
+        # Направление сортировки - интерактивные кнопки с индикатором
+        tk.Label(sort_group, text="Порядок сортировки:", font=("Segoe UI", 9, "bold"),
+                 bg=CARD_BG, fg=TEXT_COLOR, anchor="w").pack(fill=tk.X, pady=(6, 4))
 
-        rb_desc = tk.Radiobutton(sort_group, text="Сортировка по убыванию", value="DESC",
-                                 variable=self.sort_dir_var, font=("Segoe UI", 8),
-                                 bg=CARD_BG, activebackground=CARD_BG)
-        rb_desc.pack(anchor="w", pady=1)
+        dir_box = tk.Frame(sort_group, bg=CARD_BG)
+        dir_box.pack(fill=tk.X, pady=(0, 4))
+        dir_box.columnconfigure(0, weight=1, uniform="dir_btn")
+        dir_box.columnconfigure(1, weight=1, uniform="dir_btn")
 
-        self.btn_sort = tk.Button(sort_group, text="Сортировать", font=("Segoe UI", 9, "bold"),
-                                  bg="#F1F5F9", fg=TEXT_COLOR, relief=tk.GROOVE, bd=1,
-                                  cursor="hand2", state="disabled", command=self.apply_sort)
-        self.btn_sort.pack(fill=tk.X, pady=(8, 2))
+        self.btn_dir_asc = tk.Button(dir_box, text="▲ По возр.", cursor="hand2", pady=4,
+                                     command=lambda: self.set_direction("ASC"))
+        self.btn_dir_asc.grid(row=0, column=0, padx=2, sticky="ew")
+
+        self.btn_dir_desc = tk.Button(dir_box, text="▼ По убыв.", cursor="hand2", pady=4,
+                                      command=lambda: self.set_direction("DESC"))
+        self.btn_dir_desc.grid(row=0, column=1, padx=2, sticky="ew")
+
+        self.lbl_dir_status = tk.Label(sort_group, text="", font=("Segoe UI", 8, "bold"),
+                                       bg=CARD_BG, anchor="w")
+        self.lbl_dir_status.pack(fill=tk.X, pady=(2, 8))
+
+        # Заметная 3D кнопка запуска сортировки
+        self.btn_sort = tk.Button(sort_group, text="Применить сортировку", font=("Segoe UI", 9, "bold"),
+                                  bg=ACCENT_COLOR, fg="#FFFFFF", activebackground="#1D4ED8", activeforeground="#FFFFFF",
+                                  relief=tk.RAISED, bd=2, cursor="hand2", pady=6, command=self.apply_sort)
+        self.btn_sort.pack(fill=tk.X, pady=(6, 2))
 
         # Нижняя панель: Фильтрация, Поиск, Кнопки управления
         bottom_card = tk.Frame(self, bg=CARD_BG, relief=tk.SOLID, bd=1, padx=14, pady=10)
@@ -180,14 +193,14 @@ class TableViewForm16(tk.Toplevel):
                                       state="readonly", width=36)
         self.cb_filter.pack(side=tk.LEFT, padx=(0, 10))
 
-        btn_filter = tk.Button(row_filter, text="Фильтровать", font=("Segoe UI", 9),
-                               bg="#EFF6FF", fg=ACCENT_COLOR, relief=tk.GROOVE, bd=1,
-                               cursor="hand2", padx=10, command=self.apply_filter)
+        btn_filter = tk.Button(row_filter, text="Фильтровать", font=("Segoe UI", 9, "bold"),
+                               bg="#EFF6FF", fg=ACCENT_COLOR, relief=tk.RAISED, bd=2,
+                               cursor="hand2", padx=12, pady=2, command=self.apply_filter)
         btn_filter.pack(side=tk.LEFT, padx=4)
 
         btn_show_all = tk.Button(row_filter, text="Показать все", font=("Segoe UI", 9),
-                                 bg="#F8FAFC", fg=TEXT_COLOR, relief=tk.GROOVE, bd=1,
-                                 cursor="hand2", padx=10, command=self.show_all_records)
+                                 bg="#F8FAFC", fg=TEXT_COLOR, relief=tk.RAISED, bd=2,
+                                 cursor="hand2", padx=12, pady=2, command=self.show_all_records)
         btn_show_all.pack(side=tk.LEFT, padx=4)
 
         # Ряд 2: Поиск
@@ -204,20 +217,32 @@ class TableViewForm16(tk.Toplevel):
         self.entry_search.bind("<Return>", lambda e: self.apply_search())
 
         btn_search = tk.Button(row_search, text="Найти", font=("Segoe UI", 9, "bold"),
-                               bg="#EFF6FF", fg=ACCENT_COLOR, relief=tk.GROOVE, bd=1,
-                               cursor="hand2", padx=14, command=self.apply_search)
+                               bg="#EFF6FF", fg=PRIMARY_COLOR, relief=tk.RAISED, bd=2,
+                               cursor="hand2", padx=16, pady=2, command=self.apply_search)
         btn_search.pack(side=tk.LEFT, padx=4)
 
-        btn_close = tk.Button(row_search, text="Закрыть", font=("Segoe UI", 9),
-                              bg="#FEF2F2", fg="#DC2626", relief=tk.GROOVE, bd=1,
-                              cursor="hand2", padx=14, command=self.destroy)
+        btn_close = tk.Button(row_search, text="Закрыть", font=("Segoe UI", 9, "bold"),
+                              bg="#FEF2F2", fg="#DC2626", relief=tk.RAISED, bd=2,
+                              cursor="hand2", padx=16, pady=2, command=self.destroy)
         btn_close.pack(side=tk.RIGHT, padx=4)
 
-        # Статусная строка
         self.status_var = tk.StringVar(value="Готово")
         lbl_status = tk.Label(self, textvariable=self.status_var, font=("Segoe UI", 8),
                               bg=BG_COLOR, fg="#64748B", anchor="w", padx=18)
         lbl_status.pack(fill=tk.X, side=tk.BOTTOM, pady=(0, 4))
+
+        self.set_direction("ASC")
+
+    def set_direction(self, direction):
+        self.sort_direction = direction
+        if direction == "ASC":
+            self.btn_dir_asc.config(bg=PRIMARY_COLOR, fg="#FFFFFF", relief=tk.SUNKEN, bd=2, font=("Segoe UI", 9, "bold"))
+            self.btn_dir_desc.config(bg="#F8FAFC", fg=TEXT_COLOR, relief=tk.RAISED, bd=1, font=("Segoe UI", 9))
+            self.lbl_dir_status.config(text="Включено: по возрастанию (А → Я)", fg=PRIMARY_COLOR)
+        else:
+            self.btn_dir_desc.config(bg=PRIMARY_COLOR, fg="#FFFFFF", relief=tk.SUNKEN, bd=2, font=("Segoe UI", 9, "bold"))
+            self.btn_dir_asc.config(bg="#F8FAFC", fg=TEXT_COLOR, relief=tk.RAISED, bd=1, font=("Segoe UI", 9))
+            self.lbl_dir_status.config(text="Включено: по убыванию (Я → А)", fg="#B91C1C")
 
     def _on_table_switch(self):
         new_tbl = self.tbl_var.get()
@@ -242,117 +267,102 @@ class TableViewForm16(tk.Toplevel):
         self.listbox.delete(0, tk.END)
         for sfield in cfg["sort_fields"]:
             self.listbox.insert(tk.END, sfield)
-        self.btn_sort.config(state="disabled")
+
+        # Выбираем первое поле по умолчанию
+        if cfg["sort_fields"]:
+            self.listbox.selection_set(0)
 
         conn = get_connection()
         cur = conn.cursor()
         cur.execute(cfg["query"])
-        rows = cur.fetchall()
+        self.raw_rows = [list(row) for row in cur.fetchall()]
         conn.close()
 
-        self.raw_rows = [list(r) for r in rows]
         self.filtered_rows = list(self.raw_rows)
+        self._populate_tree(self.filtered_rows)
 
-        self._populate_grid(self.filtered_rows)
-
-        filter_col_idx = col_ids.index(cfg["filter_col"])
-        vals = sorted(list(set(str(r[filter_col_idx]) for r in self.raw_rows if r[filter_col_idx] is not None)))
-        self.cb_filter["values"] = vals
-        if vals:
+        filter_idx = [c[0] for c in cfg["columns"]].index(cfg["filter_col"])
+        unique_vals = sorted(list(set(str(r[filter_idx]) for r in self.raw_rows if r[filter_idx])))
+        self.cb_filter["values"] = unique_vals
+        if unique_vals:
             self.cb_filter.current(0)
-        else:
-            self.filter_var.set("")
 
-        self.status_var.set(f"Загружено записей: {len(self.filtered_rows)}")
+        self.status_var.set(f"Загружено записей: {len(self.raw_rows)}")
 
-    def _populate_grid(self, rows_to_display, highlight_set=None):
+    def _populate_tree(self, rows_list, highlight_indices=None):
         for item in self.tree.get_children():
             self.tree.delete(item)
 
-        highlight_set = highlight_set or set()
-        for idx, row in enumerate(rows_to_display):
-            tag = "highlight" if idx in highlight_set else "normal"
-            self.tree.insert("", tk.END, values=row, tags=(tag,))
+        highlight_indices = highlight_indices or set()
+        for idx, row in enumerate(rows_list):
+            str_vals = [str(v) if v is not None else "" for v in row]
+            tag = "highlight" if idx in highlight_indices else "normal"
+            self.tree.insert("", "end", iid=str(idx), values=str_vals, tags=(tag,))
 
     def _on_listbox_select(self, event):
-        sel = self.listbox.curselection()
-        if sel:
-            self.btn_sort.config(state="normal", bg="#EFF6FF", fg=PRIMARY_COLOR)
-        else:
-            self.btn_sort.config(state="disabled", bg="#F1F5F9", fg=TEXT_COLOR)
+        pass
 
     def apply_sort(self):
         sel = self.listbox.curselection()
         if not sel:
-            return
+            self.listbox.selection_set(0)
+            sel = (0,)
+
         col_idx = sel[0]
-        direction = self.sort_dir_var.get()
-        reverse = (direction == "DESC")
+        descending = (self.sort_direction == "DESC")
 
-        def sort_key(row):
-            val = row[col_idx]
-            if val is None:
-                return (1, "")
+        def sort_key(item):
+            val = item[col_idx]
+            if isinstance(val, (int, float)):
+                return val
             try:
-                return (0, float(val))
-            except ValueError:
-                return (0, str(val).lower())
+                return int(val)
+            except (ValueError, TypeError):
+                return str(val).lower()
 
-        self.filtered_rows.sort(key=sort_key, reverse=reverse)
-        self._populate_grid(self.filtered_rows)
-
-        dir_ru = "по убыванию" if reverse else "по возрастанию"
-        fname = self.table_configs[self.current_table]["sort_fields"][col_idx]
-        self.status_var.set(f"Выполнена сортировка по полю '{fname}' ({dir_ru}). Всего строк: {len(self.filtered_rows)}")
+        self.filtered_rows.sort(key=sort_key, reverse=descending)
+        self._populate_tree(self.filtered_rows)
+        field_name = self.table_configs[self.current_table]["sort_fields"][col_idx]
+        dir_text = "убыванию" if descending else "возрастанию"
+        self.status_var.set(f"Отсортировано по полю '{field_name}' ({dir_text})")
 
     def apply_filter(self):
         val = self.filter_var.get().strip()
         if not val:
-            messagebox.showwarning("Внимание", "Выберите значение для фильтрации!", parent=self)
             return
-
         cfg = self.table_configs[self.current_table]
-        col_ids = [c[0] for c in cfg["columns"]]
-        col_idx = col_ids.index(cfg["filter_col"])
+        filter_col_idx = [c[0] for c in cfg["columns"]].index(cfg["filter_col"])
 
-        self.filtered_rows = [r for r in self.raw_rows if str(r[col_idx]) == val]
-        self._populate_grid(self.filtered_rows)
-        self.status_var.set(f"Применен фильтр: {cfg['filter_label']} '{val}'. Найдено записей: {len(self.filtered_rows)}")
+        self.filtered_rows = [r for r in self.raw_rows if str(r[filter_col_idx]) == val]
+        self._populate_tree(self.filtered_rows)
+        self.status_var.set(f"Применен фильтр: {cfg['filter_label']} '{val}' (найдено: {len(self.filtered_rows)})")
 
     def show_all_records(self):
         self.filtered_rows = list(self.raw_rows)
-        self._populate_grid(self.filtered_rows)
+        self._populate_tree(self.filtered_rows)
         self.search_var.set("")
-        self.status_var.set(f"Фильтр сброшен. Показаны все записи: {len(self.filtered_rows)}")
+        self.status_var.set(f"Отображены все записи (всего: {len(self.raw_rows)})")
 
     def apply_search(self):
-        crit = self.search_var.get().strip().lower()
-        if not crit:
-            messagebox.showwarning("Внимание", "Введите текст для поиска в поле 'Критерий'!", parent=self)
+        query = self.search_var.get().strip().lower()
+        if not query:
+            self._populate_tree(self.filtered_rows)
             return
 
-        matches_indices = set()
+        matching_indices = set()
         for idx, row in enumerate(self.filtered_rows):
-            row_str = " ".join(str(cell).lower() for cell in row)
-            if crit in row_str:
-                matches_indices.add(idx)
+            for cell in row:
+                if query in str(cell).lower():
+                    matching_indices.add(idx)
+                    break
 
-        self._populate_grid(self.filtered_rows, highlight_set=matches_indices)
-
-        if matches_indices:
-            self.status_var.set(f"Поиск '{crit}': найдено {len(matches_indices)} совпадений (выделены цветом)")
-            first_idx = sorted(list(matches_indices))[0]
-            items = self.tree.get_children()
-            if items:
-                self.tree.see(items[first_idx])
-                self.tree.selection_set(items[first_idx])
+        self._populate_tree(self.filtered_rows, highlight_indices=matching_indices)
+        total_found = len(matching_indices)
+        if total_found > 0:
+            first_match = sorted(list(matching_indices))[0]
+            self.tree.see(str(first_match))
+            self.tree.selection_set(str(first_match))
+            self.status_var.set(f"Поиск по критерию '{query}': найдено совпадений {total_found}")
         else:
-            self.status_var.set(f"Поиск '{crit}': совпадений не найдено")
-            messagebox.showinfo("Результат поиска", f"Записей, содержащих '{crit}', не обнаружено.", parent=self)
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    root.withdraw()
-    win = TableViewForm16(root)
-    win.protocol("WM_DELETE_WINDOW", root.destroy)
-    root.mainloop()
+            self.status_var.set(f"По запросу '{query}' ничего не найдено")
+            messagebox.showinfo("Поиск", f"По критерию '{query}' записей не найдено.", parent=self)

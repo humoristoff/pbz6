@@ -13,13 +13,14 @@ class TableViewForm(tk.Toplevel):
     def __init__(self, parent, initial_table="books"):
         super().__init__(parent)
         self.title("Табличный вид — Сортировка, фильтрация и поиск")
-        self.geometry("920x640")
+        self.geometry("980x660")
         self.configure(bg=WIN_BG)
         self.resizable(False, False)
 
         self.current_table = initial_table
         self.raw_rows = []
         self.filtered_rows = []
+        self.sort_direction = "ASC"
 
         self._init_table_configs()
         self._build_ui()
@@ -75,8 +76,8 @@ class TableViewForm(tk.Toplevel):
         }
 
     def _build_ui(self):
-        # Панель переключения таблиц вверху
-        nav_top = tk.Frame(self, bg=WIN_BG, padx=14, pady=6)
+        # 1. Верхний переключатель таблиц
+        nav_top = tk.Frame(self, bg=WIN_BG, padx=16, pady=6)
         nav_top.pack(fill=tk.X)
 
         tk.Label(nav_top, text="Выберите таблицу:", font=("Tahoma", 9, "bold"),
@@ -87,20 +88,23 @@ class TableViewForm(tk.Toplevel):
             rb = tk.Radiobutton(nav_top, text=tbl_label, value=tbl_key, variable=self.tbl_var,
                                 font=("Tahoma", 9), bg=WIN_BG, activebackground=WIN_BG,
                                 command=self._on_table_switch)
-            rb.pack(side=tk.LEFT, padx=6)
+            rb.pack(side=tk.LEFT, padx=8)
 
-        # Заголовок таблицы
+        # 2. Заголовок таблицы
         self.lbl_title = tk.Label(self, text="Таблица (Табличный вид)", font=("Microsoft Sans Serif", 14, "bold"),
                                   fg=HEADER_COLOR, bg=WIN_BG)
         self.lbl_title.pack(anchor="w", padx=16, pady=(2, 6))
 
-        # Основной контейнер
+        # 3. Основной контейнер с надежной сеткой (grid)
         main_box = tk.Frame(self, bg=WIN_BG)
-        main_box.pack(fill=tk.BOTH, expand=True, padx=14, pady=2)
+        main_box.pack(fill=tk.BOTH, expand=True, padx=16, pady=2)
+        main_box.columnconfigure(0, weight=1)
+        main_box.columnconfigure(1, weight=0, minsize=290)
+        main_box.rowconfigure(0, weight=1)
 
-        # Левая часть: DataGridView
+        # Левая часть: DataGridView (Treeview)
         grid_frame = tk.Frame(main_box, bg=WIN_BG, relief=tk.SUNKEN, bd=2)
-        grid_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
+        grid_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 14))
 
         self.tree = ttk.Treeview(grid_frame, show="headings", selectmode="browse")
         vsb = ttk.Scrollbar(grid_frame, orient="vertical", command=self.tree.yview)
@@ -117,18 +121,19 @@ class TableViewForm(tk.Toplevel):
         self.tree.tag_configure("highlight", background=HIGHLIGHT_BG, foreground=HIGHLIGHT_FG)
         self.tree.tag_configure("normal", background="#FFFFFF", foreground="#000000")
 
-        # Правая часть: GroupBox Сортировка
+        # Правая часть: GroupBox Сортировка (фиксированная комфортная ширина 290px)
         sort_group = tk.LabelFrame(main_box, text="Сортировка", font=("Tahoma", 9, "bold"),
-                                   bg=WIN_BG, fg=HEADER_COLOR, padx=12, pady=8, relief=tk.GROOVE, bd=2, width=260)
-        sort_group.pack(side=tk.RIGHT, fill=tk.Y)
+                                   bg=WIN_BG, fg=HEADER_COLOR, padx=14, pady=10, relief=tk.GROOVE, bd=2, width=290)
+        sort_group.grid(row=0, column=1, sticky="nsew")
+        sort_group.grid_propagate(False)
 
-        tk.Label(sort_group, text="Поле для сортировки:", font=("Tahoma", 9),
+        tk.Label(sort_group, text="Поле для сортировки:", font=("Tahoma", 9, "bold"),
                  bg=WIN_BG, fg="#000000", anchor="w").pack(fill=tk.X, pady=(0, 4))
 
         list_frame = tk.Frame(sort_group, bg=WIN_BG)
-        list_frame.pack(fill=tk.X, pady=(0, 6))
+        list_frame.pack(fill=tk.X, pady=(0, 8))
 
-        self.listbox = tk.Listbox(list_frame, height=5, font=("Tahoma", 9),
+        self.listbox = tk.Listbox(list_frame, height=6, font=("Tahoma", 9),
                                   selectmode=tk.SINGLE, relief=tk.SUNKEN, bd=1)
         lb_vsb = ttk.Scrollbar(list_frame, orient="vertical", command=self.listbox.yview)
         self.listbox.configure(yscrollcommand=lb_vsb.set)
@@ -137,25 +142,37 @@ class TableViewForm(tk.Toplevel):
 
         self.listbox.bind("<<ListboxSelect>>", self._on_listbox_select)
 
-        self.sort_dir_var = tk.StringVar(value="ASC")
-        rb_asc = tk.Radiobutton(sort_group, text="Сортировка по возрастанию", value="ASC",
-                                variable=self.sort_dir_var, font=("Tahoma", 9),
-                                bg=WIN_BG, activebackground=WIN_BG)
-        rb_asc.pack(anchor="w", pady=2)
+        # Направление сортировки — четкие интерактивные кнопки с подсветкой активного режима
+        tk.Label(sort_group, text="Направление сортировки:", font=("Tahoma", 9, "bold"),
+                 bg=WIN_BG, fg="#000000", anchor="w").pack(fill=tk.X, pady=(4, 4))
 
-        rb_desc = tk.Radiobutton(sort_group, text="Сортировка по убыванию", value="DESC",
-                                 variable=self.sort_dir_var, font=("Tahoma", 9),
-                                 bg=WIN_BG, activebackground=WIN_BG)
-        rb_desc.pack(anchor="w", pady=2)
+        dir_frame = tk.Frame(sort_group, bg=WIN_BG)
+        dir_frame.pack(fill=tk.X, pady=(0, 8))
+        dir_frame.columnconfigure(0, weight=1, uniform="dir_btn")
+        dir_frame.columnconfigure(1, weight=1, uniform="dir_btn")
 
-        self.btn_sort = tk.Button(sort_group, text="Сортировать", font=("Tahoma", 9, "bold"),
-                                  bg=BTN_BG, relief=tk.RAISED, bd=1,
-                                  cursor="hand2", state="disabled", command=self.apply_sort)
-        self.btn_sort.pack(fill=tk.X, pady=(10, 4))
+        self.btn_dir_asc = tk.Button(dir_frame, text="▲ По возр.", cursor="hand2", pady=4,
+                                     command=lambda: self.set_direction("ASC"))
+        self.btn_dir_asc.grid(row=0, column=0, padx=(0, 2), sticky="ew")
 
-        # Нижняя панель: Фильтрация, Поиск, Кнопки управления (Рис. 11.10)
+        self.btn_dir_desc = tk.Button(dir_frame, text="▼ По убыв.", cursor="hand2", pady=4,
+                                      command=lambda: self.set_direction("DESC"))
+        self.btn_dir_desc.grid(row=0, column=1, padx=(2, 0), sticky="ew")
+
+        self.lbl_dir_status = tk.Label(sort_group, text="Включено: по возрастанию (А → Я)",
+                                       font=("Tahoma", 8, "italic"), bg=WIN_BG, fg="#000080", anchor="w")
+        self.lbl_dir_status.pack(fill=tk.X, pady=(0, 10))
+
+        # Выделенная кнопка Сортировать — кликабельная, рельефная и контрастная
+        self.btn_sort = tk.Button(sort_group, text="Применить сортировку", font=("Tahoma", 9, "bold"),
+                                  bg="#E2EBF5", fg="#000080", activebackground="#B0D4F1", activeforeground="#000080",
+                                  relief=tk.RAISED, bd=2, cursor="hand2", pady=6,
+                                  command=self.apply_sort)
+        self.btn_sort.pack(fill=tk.X, pady=(4, 2))
+
+        # 4. Нижняя панель: Фильтрация, Поиск, Кнопки управления
         bottom_panel = tk.Frame(self, bg=WIN_BG, relief=tk.GROOVE, bd=2, padx=14, pady=10)
-        bottom_panel.pack(fill=tk.X, padx=14, pady=(6, 8))
+        bottom_panel.pack(fill=tk.X, padx=16, pady=(6, 8))
 
         # Ряд 1: Фильтрация
         row_filter = tk.Frame(bottom_panel, bg=WIN_BG)
@@ -167,17 +184,17 @@ class TableViewForm(tk.Toplevel):
 
         self.filter_var = tk.StringVar()
         self.cb_filter = ttk.Combobox(row_filter, textvariable=self.filter_var, font=("Tahoma", 9),
-                                      state="readonly", width=38)
+                                      state="readonly", width=42)
         self.cb_filter.pack(side=tk.LEFT, padx=(0, 10))
 
-        btn_filter = tk.Button(row_filter, text="Фильтровать", font=("Tahoma", 9),
-                               bg=BTN_BG, relief=tk.RAISED, bd=1,
-                               cursor="hand2", padx=14, command=self.apply_filter)
+        btn_filter = tk.Button(row_filter, text="Фильтровать", font=("Tahoma", 9, "bold"),
+                               bg=BTN_BG, relief=tk.RAISED, bd=2, cursor="hand2", padx=14, pady=2,
+                               command=self.apply_filter)
         btn_filter.pack(side=tk.LEFT, padx=4)
 
         btn_show_all = tk.Button(row_filter, text="Показать все", font=("Tahoma", 9),
-                                 bg=BTN_BG, relief=tk.RAISED, bd=1,
-                                 cursor="hand2", padx=14, command=self.show_all_records)
+                                 bg=BTN_BG, relief=tk.RAISED, bd=2, cursor="hand2", padx=14, pady=2,
+                                 command=self.show_all_records)
         btn_show_all.pack(side=tk.LEFT, padx=4)
 
         # Ряд 2: Поиск
@@ -190,18 +207,18 @@ class TableViewForm(tk.Toplevel):
 
         self.search_var = tk.StringVar()
         self.entry_search = tk.Entry(row_search, textvariable=self.search_var, font=("Tahoma", 9),
-                                     width=40, relief=tk.SUNKEN, bd=1)
+                                     width=44, relief=tk.SUNKEN, bd=1)
         self.entry_search.pack(side=tk.LEFT, padx=(0, 10))
         self.entry_search.bind("<Return>", lambda e: self.apply_search())
 
         btn_search = tk.Button(row_search, text="Найти", font=("Tahoma", 9, "bold"),
-                               bg=BTN_BG, relief=tk.RAISED, bd=1,
-                               cursor="hand2", padx=16, command=self.apply_search)
+                               bg="#E2EBF5", fg="#000080", relief=tk.RAISED, bd=2,
+                               cursor="hand2", padx=16, pady=2, command=self.apply_search)
         btn_search.pack(side=tk.LEFT, padx=4)
 
-        btn_close = tk.Button(row_search, text="Закрыть", font=("Tahoma", 9),
-                              bg=BTN_BG, relief=tk.RAISED, bd=1,
-                              cursor="hand2", padx=16, command=self.destroy)
+        btn_close = tk.Button(row_search, text="Закрыть", font=("Tahoma", 9, "bold"),
+                              bg=BTN_BG, fg="#CC0000", relief=tk.RAISED, bd=2,
+                              cursor="hand2", padx=18, pady=2, command=self.destroy)
         btn_close.pack(side=tk.RIGHT, padx=4)
 
         # Статусная строка
@@ -209,6 +226,19 @@ class TableViewForm(tk.Toplevel):
         lbl_status = tk.Label(self, textvariable=self.status_var, font=("Tahoma", 8),
                               bg=WIN_BG, fg="#555555", anchor="w", padx=18)
         lbl_status.pack(fill=tk.X, side=tk.BOTTOM, pady=(0, 4))
+
+        self.set_direction("ASC")
+
+    def set_direction(self, direction):
+        self.sort_direction = direction
+        if direction == "ASC":
+            self.btn_dir_asc.config(bg="#000080", fg="#FFFFFF", relief=tk.SUNKEN, bd=2, font=("Tahoma", 9, "bold"))
+            self.btn_dir_desc.config(bg=BTN_BG, fg="#000000", relief=tk.RAISED, bd=1, font=("Tahoma", 9))
+            self.lbl_dir_status.config(text="Включено: по возрастанию (А → Я)", fg="#000080")
+        else:
+            self.btn_dir_desc.config(bg="#000080", fg="#FFFFFF", relief=tk.SUNKEN, bd=2, font=("Tahoma", 9, "bold"))
+            self.btn_dir_asc.config(bg=BTN_BG, fg="#000000", relief=tk.RAISED, bd=1, font=("Tahoma", 9))
+            self.lbl_dir_status.config(text="Включено: по убыванию (Я → А)", fg="#990000")
 
     def _on_table_switch(self):
         new_tbl = self.tbl_var.get()
@@ -233,7 +263,10 @@ class TableViewForm(tk.Toplevel):
         self.listbox.delete(0, tk.END)
         for sfield in cfg["sort_fields"]:
             self.listbox.insert(tk.END, sfield)
-        self.btn_sort.config(state="disabled")
+
+        # Выбираем первое поле по умолчанию, чтобы кнопка сразу работала
+        if cfg["sort_fields"]:
+            self.listbox.selection_set(0)
 
         conn = get_connection()
         cur = conn.cursor()
@@ -266,19 +299,16 @@ class TableViewForm(tk.Toplevel):
             self.tree.insert("", tk.END, values=row, tags=(tag,))
 
     def _on_listbox_select(self, event):
-        sel = self.listbox.curselection()
-        if sel:
-            self.btn_sort.config(state="normal")
-        else:
-            self.btn_sort.config(state="disabled")
+        pass
 
     def apply_sort(self):
         sel = self.listbox.curselection()
         if not sel:
-            return
+            self.listbox.selection_set(0)
+            sel = (0,)
+
         col_idx = sel[0]
-        direction = self.sort_dir_var.get()
-        reverse = (direction == "DESC")
+        reverse = (self.sort_direction == "DESC")
 
         def sort_key(row):
             val = row[col_idx]
@@ -294,7 +324,7 @@ class TableViewForm(tk.Toplevel):
 
         dir_ru = "по убыванию" if reverse else "по возрастанию"
         fname = self.table_configs[self.current_table]["sort_fields"][col_idx]
-        self.status_var.set(f"Сортировка по полю '{fname}' ({dir_ru}). Строк: {len(self.filtered_rows)}")
+        self.status_var.set(f"Сортировка: поле '{fname}' ({dir_ru}). Записей: {len(self.filtered_rows)}")
 
     def apply_filter(self):
         val = self.filter_var.get().strip()

@@ -17,7 +17,7 @@ class BaseWarehouseRecordForm(tk.Toplevel):
     def __init__(self, parent, title, table_name, fields_config, on_update_callback=None):
         super().__init__(parent)
         self.title(title)
-        self.geometry("750x530")
+        self.geometry("780x540")
         self.configure(bg=BG_MAIN)
         self.resizable(False, False)
 
@@ -149,11 +149,11 @@ class BaseWarehouseRecordForm(tk.Toplevel):
         ]
 
         for col_idx, (btext, bcmd, bg_col, fg_col, is_bold) in enumerate(buttons):
-            btn_row.columnconfigure(col_idx, weight=1)
+            btn_row.columnconfigure(col_idx, weight=1, uniform="nav_btn")
             f_weight = "bold" if is_bold else "normal"
             tk.Button(btn_row, text=btext, command=bcmd, bg=bg_col, fg=fg_col,
                       font=("Segoe UI", 9, f_weight), activebackground=BTN_HOVER,
-                      relief=tk.GROOVE, bd=1, cursor="hand2", pady=4
+                      relief=tk.RAISED, bd=2, cursor="hand2", pady=4
                       ).grid(row=0, column=col_idx, padx=2, sticky="ew")
 
     def open_table(self):

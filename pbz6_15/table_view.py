@@ -16,13 +16,14 @@ class TableViewForm15(tk.Toplevel):
     def __init__(self, parent, initial_table="tovary"):
         super().__init__(parent)
         self.title("Табличный вид — Сортировка, фильтрация и поиск (Склад товаров)")
-        self.geometry("940x660")
+        self.geometry("980x660")
         self.configure(bg=BG_COLOR)
         self.resizable(False, False)
 
         self.current_table = initial_table
         self.raw_rows = []
         self.filtered_rows = []
+        self.sort_direction = "ASC"
 
         self._init_table_configs()
         self._build_ui()
@@ -33,10 +34,10 @@ class TableViewForm15(tk.Toplevel):
             "tovary": {
                 "title": "Таблица «Товары» (Табличный вид)",
                 "columns": [
-                    ("kod_tovara", "Код товара", 80),
-                    ("name_t", "Наименование товара", 180),
-                    ("firma", "Склад / Организация", 160),
-                    ("name_proiz", "Производитель", 150),
+                    ("kod_tovara", "Код товара", 85),
+                    ("name_t", "Наименование товара", 185),
+                    ("firma", "Склад / Организация", 165),
+                    ("name_proiz", "Производитель", 155),
                     ("edizmer", "Ед. изм.", 80),
                     ("kol", "Количество", 90),
                 ],
@@ -55,23 +56,23 @@ class TableViewForm15(tk.Toplevel):
                 "title": "Таблица «Склады» (Табличный вид)",
                 "columns": [
                     ("kod_sklada", "Код склада", 90),
-                    ("adres", "Адрес склада", 260),
-                    ("telefon", "Телефон", 150),
-                    ("firma", "Фирма / Организация", 220),
+                    ("firma", "Организация / Склад", 220),
+                    ("gorod", "Город", 160),
+                    ("tip_hran", "Тип хранилища", 180),
                 ],
-                "filter_col": "firma",
-                "filter_label": "Организация:",
-                "sort_fields": ["Код склада", "Адрес склада", "Телефон", "Фирма / Организация"],
-                "query": "SELECT kod_sklada, adres, telefon, firma FROM sklady ORDER BY kod_sklada"
+                "filter_col": "gorod",
+                "filter_label": "Город склада:",
+                "sort_fields": ["Код склада", "Организация / Склад", "Город", "Тип хранилища"],
+                "query": "SELECT kod_sklada, firma, gorod, tip_hran FROM sklady ORDER BY kod_sklada"
             },
             "proizvoditeli": {
                 "title": "Таблица «Производители» (Табличный вид)",
                 "columns": [
                     ("kod_proiz", "Код", 70),
-                    ("name_proiz", "Производитель", 200),
-                    ("adres_proiz", "Адрес завода", 220),
-                    ("telefon_proiz", "Телефон", 140),
-                    ("strana", "Страна", 110),
+                    ("name_proiz", "Производитель", 180),
+                    ("adres_proiz", "Адрес завода", 200),
+                    ("telefon_proiz", "Телефон", 130),
+                    ("strana", "Страна", 120),
                 ],
                 "filter_col": "strana",
                 "filter_label": "Страна:",
@@ -98,12 +99,16 @@ class TableViewForm15(tk.Toplevel):
                                   fg=PRIMARY_COLOR, bg=BG_COLOR)
         self.lbl_title.pack(anchor="w", padx=16, pady=(4, 6))
 
+        # Основной контейнер с надежной сеткой (grid)
         main_box = tk.Frame(self, bg=BG_COLOR)
         main_box.pack(fill=tk.BOTH, expand=True, padx=16, pady=4)
+        main_box.columnconfigure(0, weight=1)
+        main_box.columnconfigure(1, weight=0, minsize=295)
+        main_box.rowconfigure(0, weight=1)
 
-        # Левая часть: DataGridView
+        # Левая часть: DataGridView (Treeview)
         grid_frame = tk.Frame(main_box, bg=CARD_BG, relief=tk.SOLID, bd=1)
-        grid_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
+        grid_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 14))
 
         self.tree = ttk.Treeview(grid_frame, show="headings", selectmode="browse")
         vsb = ttk.Scrollbar(grid_frame, orient="vertical", command=self.tree.yview)
@@ -120,19 +125,17 @@ class TableViewForm15(tk.Toplevel):
         self.tree.tag_configure("highlight", background=HIGHLIGHT_BG, foreground=HIGHLIGHT_FG)
         self.tree.tag_configure("normal", background="#FFFFFF", foreground=TEXT_COLOR)
 
-        # Правая часть: Блок Сортировки
-        right_box = tk.Frame(main_box, bg=BG_COLOR, width=280)
-        right_box.pack(side=tk.RIGHT, fill=tk.Y)
+        # Правая часть: GroupBox Сортировка (фиксированная ширина 295px)
+        sort_group = tk.LabelFrame(main_box, text="Сортировка", font=("Segoe UI", 9, "bold"),
+                                   bg=CARD_BG, fg=PRIMARY_COLOR, padx=14, pady=10, relief=tk.SOLID, bd=1, width=295)
+        sort_group.grid(row=0, column=1, sticky="nsew")
+        sort_group.grid_propagate(False)
 
-        sort_group = tk.LabelFrame(right_box, text="Сортировка", font=("Segoe UI", 9, "bold"),
-                                   bg=CARD_BG, fg=PRIMARY_COLOR, padx=10, pady=8, relief=tk.SOLID, bd=1)
-        sort_group.pack(fill=tk.X, pady=(0, 10))
-
-        tk.Label(sort_group, text="Поле для сортировки:", font=("Segoe UI", 9),
+        tk.Label(sort_group, text="Поле для сортировки:", font=("Segoe UI", 9, "bold"),
                  bg=CARD_BG, fg=TEXT_COLOR, anchor="w").pack(fill=tk.X, pady=(0, 4))
 
         list_frame = tk.Frame(sort_group, bg=CARD_BG)
-        list_frame.pack(fill=tk.X, pady=(0, 6))
+        list_frame.pack(fill=tk.X, pady=(0, 8))
 
         self.listbox = tk.Listbox(list_frame, height=6, font=("Segoe UI", 9),
                                   selectmode=tk.SINGLE, relief=tk.SOLID, bd=1)
@@ -143,21 +146,32 @@ class TableViewForm15(tk.Toplevel):
 
         self.listbox.bind("<<ListboxSelect>>", self._on_listbox_select)
 
-        self.sort_dir_var = tk.StringVar(value="ASC")
-        rb_asc = tk.Radiobutton(sort_group, text="Сортировка по возрастанию", value="ASC",
-                                variable=self.sort_dir_var, font=("Segoe UI", 8),
-                                bg=CARD_BG, activebackground=CARD_BG)
-        rb_asc.pack(anchor="w", pady=1)
+        # Направление сортировки - интерактивные кнопки с индикатором
+        tk.Label(sort_group, text="Порядок сортировки:", font=("Segoe UI", 9, "bold"),
+                 bg=CARD_BG, fg=TEXT_COLOR, anchor="w").pack(fill=tk.X, pady=(6, 4))
 
-        rb_desc = tk.Radiobutton(sort_group, text="Сортировка по убыванию", value="DESC",
-                                 variable=self.sort_dir_var, font=("Segoe UI", 8),
-                                 bg=CARD_BG, activebackground=CARD_BG)
-        rb_desc.pack(anchor="w", pady=1)
+        dir_box = tk.Frame(sort_group, bg=CARD_BG)
+        dir_box.pack(fill=tk.X, pady=(0, 4))
+        dir_box.columnconfigure(0, weight=1, uniform="dir_btn")
+        dir_box.columnconfigure(1, weight=1, uniform="dir_btn")
 
-        self.btn_sort = tk.Button(sort_group, text="Сортировать", font=("Segoe UI", 9, "bold"),
-                                  bg="#F1F5F9", fg=TEXT_COLOR, relief=tk.GROOVE, bd=1,
-                                  cursor="hand2", state="disabled", command=self.apply_sort)
-        self.btn_sort.pack(fill=tk.X, pady=(8, 2))
+        self.btn_dir_asc = tk.Button(dir_box, text="▲ По возр.", cursor="hand2", pady=4,
+                                     command=lambda: self.set_direction("ASC"))
+        self.btn_dir_asc.grid(row=0, column=0, padx=2, sticky="ew")
+
+        self.btn_dir_desc = tk.Button(dir_box, text="▼ По убыв.", cursor="hand2", pady=4,
+                                      command=lambda: self.set_direction("DESC"))
+        self.btn_dir_desc.grid(row=0, column=1, padx=2, sticky="ew")
+
+        self.lbl_dir_status = tk.Label(sort_group, text="", font=("Segoe UI", 8, "bold"),
+                                       bg=CARD_BG, anchor="w")
+        self.lbl_dir_status.pack(fill=tk.X, pady=(2, 8))
+
+        # Заметная 3D кнопка запуска сортировки
+        self.btn_sort = tk.Button(sort_group, text="Применить сортировку", font=("Segoe UI", 9, "bold"),
+                                  bg="#047857", fg="#FFFFFF", activebackground="#065F46", activeforeground="#FFFFFF",
+                                  relief=tk.RAISED, bd=2, cursor="hand2", pady=6, command=self.apply_sort)
+        self.btn_sort.pack(fill=tk.X, pady=(6, 2))
 
         # Нижняя панель действий (Фильтр, Поиск, Закрыть)
         bottom_card = tk.Frame(self, bg=CARD_BG, relief=tk.SOLID, bd=1, padx=14, pady=10)
@@ -176,14 +190,14 @@ class TableViewForm15(tk.Toplevel):
                                       state="readonly", width=36)
         self.cb_filter.pack(side=tk.LEFT, padx=(0, 10))
 
-        btn_filter = tk.Button(row_filter, text="Фильтровать", font=("Segoe UI", 9),
-                               bg="#ECFDF5", fg="#047857", relief=tk.GROOVE, bd=1,
-                               cursor="hand2", padx=10, command=self.apply_filter)
+        btn_filter = tk.Button(row_filter, text="Фильтровать", font=("Segoe UI", 9, "bold"),
+                               bg="#ECFDF5", fg="#047857", relief=tk.RAISED, bd=2,
+                               cursor="hand2", padx=12, pady=2, command=self.apply_filter)
         btn_filter.pack(side=tk.LEFT, padx=4)
 
         btn_show_all = tk.Button(row_filter, text="Показать все", font=("Segoe UI", 9),
-                                 bg="#F8FAFC", fg=TEXT_COLOR, relief=tk.GROOVE, bd=1,
-                                 cursor="hand2", padx=10, command=self.show_all_records)
+                                 bg="#F8FAFC", fg=TEXT_COLOR, relief=tk.RAISED, bd=2,
+                                 cursor="hand2", padx=12, pady=2, command=self.show_all_records)
         btn_show_all.pack(side=tk.LEFT, padx=4)
 
         # Ряд 2: Поиск
@@ -200,19 +214,32 @@ class TableViewForm15(tk.Toplevel):
         self.entry_search.bind("<Return>", lambda e: self.apply_search())
 
         btn_search = tk.Button(row_search, text="Найти", font=("Segoe UI", 9, "bold"),
-                               bg="#ECFDF5", fg=PRIMARY_COLOR, relief=tk.GROOVE, bd=1,
-                               cursor="hand2", padx=14, command=self.apply_search)
+                               bg="#ECFDF5", fg=PRIMARY_COLOR, relief=tk.RAISED, bd=2,
+                               cursor="hand2", padx=16, pady=2, command=self.apply_search)
         btn_search.pack(side=tk.LEFT, padx=4)
 
-        btn_close = tk.Button(row_search, text="Закрыть", font=("Segoe UI", 9),
-                              bg="#FEF2F2", fg="#DC2626", relief=tk.GROOVE, bd=1,
-                              cursor="hand2", padx=14, command=self.destroy)
+        btn_close = tk.Button(row_search, text="Закрыть", font=("Segoe UI", 9, "bold"),
+                              bg="#FEF2F2", fg="#DC2626", relief=tk.RAISED, bd=2,
+                              cursor="hand2", padx=16, pady=2, command=self.destroy)
         btn_close.pack(side=tk.RIGHT, padx=4)
 
         self.status_var = tk.StringVar(value="Готово")
         lbl_status = tk.Label(self, textvariable=self.status_var, font=("Segoe UI", 8),
                               bg=BG_COLOR, fg="#64748B", anchor="w", padx=18)
         lbl_status.pack(fill=tk.X, side=tk.BOTTOM, pady=(0, 4))
+
+        self.set_direction("ASC")
+
+    def set_direction(self, direction):
+        self.sort_direction = direction
+        if direction == "ASC":
+            self.btn_dir_asc.config(bg=PRIMARY_COLOR, fg="#FFFFFF", relief=tk.SUNKEN, bd=2, font=("Segoe UI", 9, "bold"))
+            self.btn_dir_desc.config(bg="#F8FAFC", fg=TEXT_COLOR, relief=tk.RAISED, bd=1, font=("Segoe UI", 9))
+            self.lbl_dir_status.config(text="Включено: по возрастанию (А → Я)", fg=PRIMARY_COLOR)
+        else:
+            self.btn_dir_desc.config(bg=PRIMARY_COLOR, fg="#FFFFFF", relief=tk.SUNKEN, bd=2, font=("Segoe UI", 9, "bold"))
+            self.btn_dir_asc.config(bg="#F8FAFC", fg=TEXT_COLOR, relief=tk.RAISED, bd=1, font=("Segoe UI", 9))
+            self.lbl_dir_status.config(text="Включено: по убыванию (Я → А)", fg="#B91C1C")
 
     def _on_table_switch(self):
         new_tbl = self.tbl_var.get()
@@ -237,7 +264,10 @@ class TableViewForm15(tk.Toplevel):
         self.listbox.delete(0, tk.END)
         for sfield in cfg["sort_fields"]:
             self.listbox.insert(tk.END, sfield)
-        self.btn_sort.config(state="disabled")
+
+        # Выбираем первое поле по умолчанию
+        if cfg["sort_fields"]:
+            self.listbox.selection_set(0)
 
         conn = get_connection()
         cur = conn.cursor()
@@ -267,16 +297,16 @@ class TableViewForm15(tk.Toplevel):
             self.tree.insert("", "end", iid=str(idx), values=str_vals, tags=(tag,))
 
     def _on_listbox_select(self, event):
-        sel = self.listbox.curselection()
-        if sel:
-            self.btn_sort.config(state="normal", bg="#ECFDF5", fg=PRIMARY_COLOR)
+        pass
 
     def apply_sort(self):
         sel = self.listbox.curselection()
         if not sel:
-            return
+            self.listbox.selection_set(0)
+            sel = (0,)
+
         col_idx = sel[0]
-        descending = (self.sort_dir_var.get() == "DESC")
+        descending = (self.sort_direction == "DESC")
 
         def sort_key(item):
             val = item[col_idx]
