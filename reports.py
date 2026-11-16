@@ -12,7 +12,7 @@ class ReportViewerForm(tk.Toplevel):
     def __init__(self, parent, default_report_index=1):
         super().__init__(parent)
         self.title("Генератор и просмотрщик отчетов — Библиотека (ЛР 6)")
-        self.geometry("860x640")
+        self.geometry("940x650")
         self.configure(bg=WIN_BG)
         self.resizable(False, False)
 
@@ -22,17 +22,17 @@ class ReportViewerForm(tk.Toplevel):
 
     def _build_ui(self):
         # Панель заголовка и выбора отчетов
-        top_frame = tk.Frame(self, bg=WIN_BG, padx=14, pady=8)
+        top_frame = tk.Frame(self, bg=WIN_BG, padx=16, pady=10)
         top_frame.pack(fill=tk.X)
 
         lbl_hdr = tk.Label(top_frame, text="ПОСТРОЕНИЕ И ПРОСМОТР ОТЧЕТОВ БИБЛИОТЕКИ",
-                           font=("Tahoma", 11, "bold"), fg=HEADER_COLOR, bg=WIN_BG)
-        lbl_hdr.pack(anchor="w", pady=(0, 6))
+                           font=("Tahoma", 12, "bold"), fg=HEADER_COLOR, bg=WIN_BG)
+        lbl_hdr.pack(anchor="w", pady=(0, 8))
 
         btn_box = tk.Frame(top_frame, bg=WIN_BG)
         btn_box.pack(fill=tk.X)
 
-        btn_opt = {"font": ("Tahoma", 8, "bold"), "bg": BTN_BG, "relief": tk.RAISED, "bd": 1, "cursor": "hand2", "padx": 6, "pady": 3}
+        btn_opt = {"font": ("Tahoma", 9, "bold"), "bg": BTN_BG, "relief": tk.RAISED, "bd": 1, "cursor": "hand2", "padx": 10, "pady": 4}
 
         self.btn_rep1 = tk.Button(btn_box, text="1. Каталог фонда", command=lambda: self.generate_report(1), **btn_opt)
         self.btn_rep1.pack(side=tk.LEFT, padx=3)
@@ -48,16 +48,16 @@ class ReportViewerForm(tk.Toplevel):
 
         # Контейнер отчета
         doc_card = tk.Frame(self, bg="#FFFFFF", relief=tk.SUNKEN, bd=2)
-        doc_card.pack(fill=tk.BOTH, expand=True, padx=14, pady=6)
+        doc_card.pack(fill=tk.BOTH, expand=True, padx=16, pady=6)
 
-        self.lbl_rep_title = tk.Label(doc_card, text="", font=("Tahoma", 12, "bold"), bg="#FFFFFF", fg=HEADER_COLOR)
-        self.lbl_rep_title.pack(anchor="w", padx=12, pady=(10, 2))
+        self.lbl_rep_title = tk.Label(doc_card, text="", font=("Tahoma", 13, "bold"), bg="#FFFFFF", fg=HEADER_COLOR)
+        self.lbl_rep_title.pack(anchor="w", padx=14, pady=(12, 2))
 
-        self.lbl_rep_meta = tk.Label(doc_card, text="", font=("Tahoma", 8), bg="#FFFFFF", fg="#666666")
-        self.lbl_rep_meta.pack(anchor="w", padx=12, pady=(0, 6))
+        self.lbl_rep_meta = tk.Label(doc_card, text="", font=("Tahoma", 9), bg="#FFFFFF", fg="#666666")
+        self.lbl_rep_meta.pack(anchor="w", padx=14, pady=(0, 8))
 
         tree_frame = tk.Frame(doc_card, bg="#FFFFFF")
-        tree_frame.pack(fill=tk.BOTH, expand=True, padx=12, pady=4)
+        tree_frame.pack(fill=tk.BOTH, expand=True, padx=14, pady=4)
 
         self.tree = ttk.Treeview(tree_frame, show="headings", selectmode="none")
         vsb = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
@@ -72,27 +72,27 @@ class ReportViewerForm(tk.Toplevel):
         tree_frame.columnconfigure(0, weight=1)
 
         self.lbl_summary = tk.Label(doc_card, text="", font=("Tahoma", 9, "bold"),
-                                    bg="#F0F0F0", fg=HEADER_COLOR, anchor="e", padx=14, pady=5, relief=tk.GROOVE)
+                                    bg="#F0F0F0", fg=HEADER_COLOR, anchor="e", padx=16, pady=6, relief=tk.GROOVE)
         self.lbl_summary.pack(fill=tk.X, side=tk.BOTTOM)
 
         # Нижняя панель действий
-        act_frame = tk.Frame(self, bg=WIN_BG, relief=tk.GROOVE, bd=2, padx=10, pady=6)
-        act_frame.pack(fill=tk.X, padx=14, pady=(2, 10))
+        act_frame = tk.Frame(self, bg=WIN_BG, relief=tk.GROOVE, bd=2, padx=12, pady=8)
+        act_frame.pack(fill=tk.X, padx=16, pady=(4, 12))
 
-        tk.Button(act_frame, text="Печать / Предпросмотр", font=("Tahoma", 8),
-                  bg=BTN_BG, relief=tk.RAISED, bd=1, cursor="hand2", padx=10, pady=2,
+        tk.Button(act_frame, text="Печать / Предпросмотр", font=("Tahoma", 9),
+                  bg=BTN_BG, relief=tk.RAISED, bd=1, cursor="hand2", padx=14, pady=3,
                   command=self.action_print).pack(side=tk.LEFT, padx=4)
 
-        tk.Button(act_frame, text="Экспорт в HTML", font=("Tahoma", 8, "bold"),
-                  bg="#E2EBF5", fg=HEADER_COLOR, relief=tk.RAISED, bd=1, cursor="hand2", padx=10, pady=2,
+        tk.Button(act_frame, text="Экспорт в HTML", font=("Tahoma", 9, "bold"),
+                  bg="#E2EBF5", fg=HEADER_COLOR, relief=tk.RAISED, bd=1, cursor="hand2", padx=14, pady=3,
                   command=self.action_export_html).pack(side=tk.LEFT, padx=4)
 
-        tk.Button(act_frame, text="Экспорт в TXT", font=("Tahoma", 8),
-                  bg=BTN_BG, relief=tk.RAISED, bd=1, cursor="hand2", padx=10, pady=2,
+        tk.Button(act_frame, text="Экспорт в TXT", font=("Tahoma", 9),
+                  bg=BTN_BG, relief=tk.RAISED, bd=1, cursor="hand2", padx=14, pady=3,
                   command=self.action_export_txt).pack(side=tk.LEFT, padx=4)
 
-        tk.Button(act_frame, text="Закрыть", font=("Tahoma", 8, "bold"),
-                  bg=BTN_BG, fg="#CC0000", relief=tk.RAISED, bd=1, cursor="hand2", padx=14, pady=2,
+        tk.Button(act_frame, text="Закрыть", font=("Tahoma", 9, "bold"),
+                  bg=BTN_BG, fg="#CC0000", relief=tk.RAISED, bd=1, cursor="hand2", padx=18, pady=3,
                   command=self.destroy).pack(side=tk.RIGHT, padx=4)
 
     def _highlight_button(self, idx):
@@ -122,8 +122,8 @@ class ReportViewerForm(tk.Toplevel):
             headers = [
                 ("shifr", "Шифр книги", 110),
                 ("author", "Автор произведения", 200),
-                ("title", "Название книги", 240),
-                ("publisher", "Издательство", 160),
+                ("title", "Название книги", 260),
+                ("publisher", "Издательство", 180),
                 ("year", "Год издания", 100),
             ]
             self._setup_columns(headers)
@@ -144,10 +144,10 @@ class ReportViewerForm(tk.Toplevel):
             self.lbl_rep_meta.config(text=f"Сформирован: {now_str} | Источник: Таблица libraries | База данных: library.db")
 
             headers = [
-                ("number", "Номер филиала", 120),
-                ("address", "Адрес расположения", 320),
-                ("phone", "Контактный номер телефона", 220),
-                ("copies_count", "Всего экземпляров", 140),
+                ("number", "Номер филиала", 130),
+                ("address", "Адрес расположения", 350),
+                ("phone", "Контактный номер телефона", 230),
+                ("copies_count", "Всего экземпляров", 150),
             ]
             self._setup_columns(headers)
 
@@ -172,11 +172,11 @@ class ReportViewerForm(tk.Toplevel):
 
             headers = [
                 ("id", "Код", 60),
-                ("lib", "Филиал", 110),
-                ("book", "Название книги", 220),
-                ("author", "Автор книги", 180),
-                ("pub", "Издательство", 140),
-                ("hall", "Читальный зал", 200),
+                ("lib", "Филиал", 120),
+                ("book", "Название книги", 240),
+                ("author", "Автор книги", 190),
+                ("pub", "Издательство", 150),
+                ("hall", "Читальный зал", 220),
             ]
             self._setup_columns(headers)
 
@@ -198,9 +198,9 @@ class ReportViewerForm(tk.Toplevel):
             self.lbl_rep_meta.config(text=f"Сформирован: {now_str} | Анализ структуры фонда | База данных: library.db")
 
             headers = [
-                ("publisher", "Наименование издательства", 250),
-                ("titles_cnt", "Число наименований", 170),
-                ("copies_cnt", "Количество экземпляров", 180),
+                ("publisher", "Наименование издательства", 270),
+                ("titles_cnt", "Число наименований", 180),
+                ("copies_cnt", "Количество экземпляров", 190),
                 ("percent", "Доля в фонде", 140),
             ]
             self._setup_columns(headers)

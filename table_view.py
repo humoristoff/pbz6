@@ -13,7 +13,7 @@ class TableViewForm(tk.Toplevel):
     def __init__(self, parent, initial_table="books"):
         super().__init__(parent)
         self.title("Табличный вид — Сортировка, фильтрация и поиск")
-        self.geometry("860x640")
+        self.geometry("920x640")
         self.configure(bg=WIN_BG)
         self.resizable(False, False)
 
@@ -89,12 +89,12 @@ class TableViewForm(tk.Toplevel):
                                 command=self._on_table_switch)
             rb.pack(side=tk.LEFT, padx=6)
 
-        # Заголовок таблицы (синий крупный заголовок WinForms)
+        # Заголовок таблицы
         self.lbl_title = tk.Label(self, text="Таблица (Табличный вид)", font=("Microsoft Sans Serif", 14, "bold"),
                                   fg=HEADER_COLOR, bg=WIN_BG)
         self.lbl_title.pack(anchor="w", padx=16, pady=(2, 6))
 
-        # Основной контейнер: Слева DataGridView, справа GroupBox Сортировки
+        # Основной контейнер
         main_box = tk.Frame(self, bg=WIN_BG)
         main_box.pack(fill=tk.BOTH, expand=True, padx=14, pady=2)
 
@@ -117,9 +117,9 @@ class TableViewForm(tk.Toplevel):
         self.tree.tag_configure("highlight", background=HIGHLIGHT_BG, foreground=HIGHLIGHT_FG)
         self.tree.tag_configure("normal", background="#FFFFFF", foreground="#000000")
 
-        # Правая часть: GroupBox Сортировка (по методичке WinForms)
+        # Правая часть: GroupBox Сортировка
         sort_group = tk.LabelFrame(main_box, text="Сортировка", font=("Tahoma", 9, "bold"),
-                                   bg=WIN_BG, fg=HEADER_COLOR, padx=10, pady=8, relief=tk.GROOVE, bd=2)
+                                   bg=WIN_BG, fg=HEADER_COLOR, padx=12, pady=8, relief=tk.GROOVE, bd=2, width=260)
         sort_group.pack(side=tk.RIGHT, fill=tk.Y)
 
         tk.Label(sort_group, text="Поле для сортировки:", font=("Tahoma", 9),
@@ -139,69 +139,69 @@ class TableViewForm(tk.Toplevel):
 
         self.sort_dir_var = tk.StringVar(value="ASC")
         rb_asc = tk.Radiobutton(sort_group, text="Сортировка по возрастанию", value="ASC",
-                                variable=self.sort_dir_var, font=("Tahoma", 8),
+                                variable=self.sort_dir_var, font=("Tahoma", 9),
                                 bg=WIN_BG, activebackground=WIN_BG)
-        rb_asc.pack(anchor="w", pady=1)
+        rb_asc.pack(anchor="w", pady=2)
 
         rb_desc = tk.Radiobutton(sort_group, text="Сортировка по убыванию", value="DESC",
-                                 variable=self.sort_dir_var, font=("Tahoma", 8),
+                                 variable=self.sort_dir_var, font=("Tahoma", 9),
                                  bg=WIN_BG, activebackground=WIN_BG)
-        rb_desc.pack(anchor="w", pady=1)
+        rb_desc.pack(anchor="w", pady=2)
 
         self.btn_sort = tk.Button(sort_group, text="Сортировать", font=("Tahoma", 9, "bold"),
                                   bg=BTN_BG, relief=tk.RAISED, bd=1,
                                   cursor="hand2", state="disabled", command=self.apply_sort)
-        self.btn_sort.pack(fill=tk.X, pady=(8, 2))
+        self.btn_sort.pack(fill=tk.X, pady=(10, 4))
 
         # Нижняя панель: Фильтрация, Поиск, Кнопки управления (Рис. 11.10)
-        bottom_panel = tk.Frame(self, bg=WIN_BG, relief=tk.GROOVE, bd=2, padx=12, pady=8)
+        bottom_panel = tk.Frame(self, bg=WIN_BG, relief=tk.GROOVE, bd=2, padx=14, pady=10)
         bottom_panel.pack(fill=tk.X, padx=14, pady=(6, 8))
 
         # Ряд 1: Фильтрация
         row_filter = tk.Frame(bottom_panel, bg=WIN_BG)
         row_filter.pack(fill=tk.X, pady=3)
 
-        self.lbl_filter = tk.Label(row_filter, text="Поле фильтра:", width=13, anchor="w",
+        self.lbl_filter = tk.Label(row_filter, text="Поле фильтра:", width=14, anchor="w",
                                    font=("Tahoma", 9, "bold"), bg=WIN_BG)
         self.lbl_filter.pack(side=tk.LEFT)
 
         self.filter_var = tk.StringVar()
         self.cb_filter = ttk.Combobox(row_filter, textvariable=self.filter_var, font=("Tahoma", 9),
-                                      state="readonly", width=36)
+                                      state="readonly", width=38)
         self.cb_filter.pack(side=tk.LEFT, padx=(0, 10))
 
         btn_filter = tk.Button(row_filter, text="Фильтровать", font=("Tahoma", 9),
                                bg=BTN_BG, relief=tk.RAISED, bd=1,
-                               cursor="hand2", padx=10, command=self.apply_filter)
+                               cursor="hand2", padx=14, command=self.apply_filter)
         btn_filter.pack(side=tk.LEFT, padx=4)
 
         btn_show_all = tk.Button(row_filter, text="Показать все", font=("Tahoma", 9),
                                  bg=BTN_BG, relief=tk.RAISED, bd=1,
-                                 cursor="hand2", padx=10, command=self.show_all_records)
+                                 cursor="hand2", padx=14, command=self.show_all_records)
         btn_show_all.pack(side=tk.LEFT, padx=4)
 
         # Ряд 2: Поиск
         row_search = tk.Frame(bottom_panel, bg=WIN_BG)
         row_search.pack(fill=tk.X, pady=3)
 
-        lbl_crit = tk.Label(row_search, text="Критерий:", width=13, anchor="w",
+        lbl_crit = tk.Label(row_search, text="Критерий:", width=14, anchor="w",
                             font=("Tahoma", 9, "bold"), bg=WIN_BG)
         lbl_crit.pack(side=tk.LEFT)
 
         self.search_var = tk.StringVar()
         self.entry_search = tk.Entry(row_search, textvariable=self.search_var, font=("Tahoma", 9),
-                                     width=38, relief=tk.SUNKEN, bd=1)
+                                     width=40, relief=tk.SUNKEN, bd=1)
         self.entry_search.pack(side=tk.LEFT, padx=(0, 10))
         self.entry_search.bind("<Return>", lambda e: self.apply_search())
 
         btn_search = tk.Button(row_search, text="Найти", font=("Tahoma", 9, "bold"),
                                bg=BTN_BG, relief=tk.RAISED, bd=1,
-                               cursor="hand2", padx=14, command=self.apply_search)
+                               cursor="hand2", padx=16, command=self.apply_search)
         btn_search.pack(side=tk.LEFT, padx=4)
 
         btn_close = tk.Button(row_search, text="Закрыть", font=("Tahoma", 9),
                               bg=BTN_BG, relief=tk.RAISED, bd=1,
-                              cursor="hand2", padx=14, command=self.destroy)
+                              cursor="hand2", padx=16, command=self.destroy)
         btn_close.pack(side=tk.RIGHT, padx=4)
 
         # Статусная строка

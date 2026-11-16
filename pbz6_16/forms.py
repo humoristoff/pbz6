@@ -17,7 +17,7 @@ class BaseModernRecordForm16(tk.Toplevel):
     def __init__(self, parent, title, table_name, fields_config, on_update_callback=None):
         super().__init__(parent)
         self.title(title)
-        self.geometry("630x540")
+        self.geometry("750x530")
         self.configure(bg=BG_MAIN)
         self.resizable(False, False)
 

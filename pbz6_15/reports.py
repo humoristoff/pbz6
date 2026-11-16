@@ -15,7 +15,7 @@ class ReportViewerForm15(tk.Toplevel):
     def __init__(self, parent, default_report_index=1):
         super().__init__(parent)
         self.title("Генератор и просмотрщик отчетов — Склад товаров (ЛР 6)")
-        self.geometry("880x660")
+        self.geometry("940x660")
         self.configure(bg=BG_COLOR)
         self.resizable(False, False)
 

@@ -17,7 +17,7 @@ class TableViewForm16(tk.Toplevel):
     def __init__(self, parent, initial_table="books"):
         super().__init__(parent)
         self.title("Табличный вид — Сортировка, фильтрация и поиск (ЛР 6)")
-        self.geometry("870x650")
+        self.geometry("940x650")
         self.configure(bg=BG_COLOR)
         self.resizable(False, False)
 

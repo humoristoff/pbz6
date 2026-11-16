@@ -19,11 +19,11 @@ class ModernMainWindow16(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("ИС \"Библиотека\" — Лабораторная работа № 6 (Вар. 16)")
-        self.geometry("490x570")
+        self.geometry("540x590")
         self.configure(bg=BG_MAIN)
         self.resizable(False, False)
 
-        self.center_window(490, 570)
+        self.center_window(540, 590)
         init_db()
 
         self._build_menu()
@@ -87,46 +87,56 @@ class ModernMainWindow16(tk.Tk):
                                   fg=TEXT_MUTED, bg=CARD_BG, pady=6)
         self.lbl_stats.pack()
 
-        # 3. Карточный блок кнопок навигации
+        # 3. Карточный блок кнопок навигации (как в Лаб 5)
         buttons_frame = tk.Frame(self, bg=BG_MAIN)
-        buttons_frame.pack(fill=tk.BOTH, expand=True, padx=16, pady=6)
+        buttons_frame.pack(fill=tk.BOTH, expand=True, padx=16, pady=4)
 
-        self._create_nav_button(buttons_frame, "Таблица «Книги»", "Каталог библиотечного фонда и авторов", self.open_books)
-        self._create_nav_button(buttons_frame, "Таблица «Читатели»", "Реестр читателей, контакты и образование", self.open_readers)
+        self._create_nav_button(buttons_frame, "Таблица «Книги»", "Каталог библиотечного фонда, авторы и издания", self.open_books)
+        self._create_nav_button(buttons_frame, "Таблица «Читатели»", "Реестр читателей, контакты, адреса и образование", self.open_readers)
         self._create_nav_button(buttons_frame, "Таблица «Выдача»", "Журнал выданных книг и контроль дат возврата", self.open_loans)
 
-        # 4. Табличный вид и отчеты
-        btn_grid = tk.Button(buttons_frame, text="Табличный вид (Сортировка/Фильтр/Поиск)",
+        # 4. Табличный вид и отчеты (полноразмерные без обрезки)
+        btn_grid = tk.Button(buttons_frame, text="Табличный вид (сортировка, фильтр, поиск)",
                              command=self.open_table_view,
                              font=("Segoe UI", 9, "bold"),
                              bg="#2563EB", fg="white", activebackground="#1D4ED8", activeforeground="white",
                              relief=tk.FLAT, cursor="hand2", pady=7)
-        btn_grid.pack(fill=tk.X, pady=(6, 4))
+        btn_grid.pack(fill=tk.X, pady=(6, 3))
 
         btn_rep = tk.Button(buttons_frame, text="Генератор аналитических отчетов",
                             command=self.open_reports,
                             font=("Segoe UI", 9, "bold"),
                             bg="#0284C7", fg="white", activebackground="#0369A1", activeforeground="white",
                             relief=tk.FLAT, cursor="hand2", pady=7)
-        btn_rep.pack(fill=tk.X, pady=4)
+        btn_rep.pack(fill=tk.X, pady=3)
 
         # 5. Кнопка выхода
         btn_exit = tk.Button(buttons_frame, text="Выход из системы", command=self.destroy,
                              font=("Segoe UI", 9), bg="#E2E8F0", fg=TEXT_DARK,
                              activebackground="#CBD5E1", relief=tk.FLAT, cursor="hand2", pady=5)
-        btn_exit.pack(fill=tk.X, pady=(6, 4))
+        btn_exit.pack(fill=tk.X, pady=(5, 4))
 
     def _create_nav_button(self, parent, title, subtitle, command):
         card = tk.Frame(parent, bg=CARD_BG, relief=tk.SOLID, bd=1, cursor="hand2")
         card.pack(fill=tk.X, pady=3)
 
-        btn = tk.Button(card, text=title, font=("Segoe UI", 10, "bold"),
-                        bg=PRIMARY_COLOR, fg="white", activebackground=ACCENT_BLUE, activeforeground="white",
-                        relief=tk.FLAT, cursor="hand2", width=18, pady=4, command=command)
-        btn.pack(side=tk.LEFT)
+        inner = tk.Frame(card, bg=CARD_BG, padx=12, pady=6)
+        inner.pack(fill=tk.X)
 
-        lbl = tk.Label(card, text=subtitle, font=("Segoe UI", 8), bg=CARD_BG, fg=TEXT_MUTED, padx=10)
-        lbl.pack(side=tk.LEFT, fill=tk.X, expand=True, anchor="w")
+        t_lbl = tk.Label(inner, text=title, font=("Segoe UI", 10, "bold"), fg=PRIMARY_COLOR, bg=CARD_BG, cursor="hand2")
+        t_lbl.pack(anchor="w")
+
+        s_lbl = tk.Label(inner, text=subtitle, font=("Segoe UI", 8), fg=TEXT_MUTED, bg=CARD_BG, cursor="hand2")
+        s_lbl.pack(anchor="w")
+
+        for w in (card, inner, t_lbl, s_lbl):
+            w.bind("<Button-1>", lambda e, c=command: c())
+            w.bind("<Enter>", lambda e, cd=card, i=inner, t=t_lbl, s=s_lbl: [
+                cd.config(bg="#EFF6FF"), i.config(bg="#EFF6FF"), t.config(bg="#EFF6FF"), s.config(bg="#EFF6FF")
+            ])
+            w.bind("<Leave>", lambda e, cd=card, i=inner, t=t_lbl, s=s_lbl: [
+                cd.config(bg=CARD_BG), i.config(bg=CARD_BG), t.config(bg=CARD_BG), s.config(bg=CARD_BG)
+            ])
 
     def update_stats(self):
         try:

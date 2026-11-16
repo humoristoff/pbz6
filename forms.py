@@ -8,13 +8,12 @@ from reports import ReportViewerForm
 WIN_BG = "#ECE9D8"
 HEADER_COLOR = "#000080"
 BTN_BG = "#F0EFEA"
-BTN_BORDER = "#808080"
 
 class BaseRecordForm(tk.Toplevel):
     def __init__(self, parent, title, table_name, fields_config, on_update_callback=None):
         super().__init__(parent)
         self.title(title)
-        self.geometry("560x490")
+        self.geometry("740x510")
         self.configure(bg=WIN_BG)
         self.resizable(False, False)
 
@@ -37,49 +36,49 @@ class BaseRecordForm(tk.Toplevel):
         nav_opt = {"font": ("Tahoma", 8), "bg": BTN_BG, "relief": tk.GROOVE, "bd": 1, "cursor": "hand2"}
 
         self.btn_nav_first = tk.Button(nav_frame, text="|◀", width=3, command=self.go_first, **nav_opt)
-        self.btn_nav_first.pack(side=tk.LEFT, padx=1, pady=2)
+        self.btn_nav_first.pack(side=tk.LEFT, padx=2, pady=2)
 
         self.btn_nav_prev = tk.Button(nav_frame, text="◀", width=3, command=self.go_prev, **nav_opt)
-        self.btn_nav_prev.pack(side=tk.LEFT, padx=1, pady=2)
+        self.btn_nav_prev.pack(side=tk.LEFT, padx=2, pady=2)
 
         self.nav_pos_var = tk.StringVar(value="0 из 0")
-        self.nav_pos_label = tk.Label(nav_frame, textvariable=self.nav_pos_var, bg="#E6E3D3", font=("Tahoma", 9), width=10)
-        self.nav_pos_label.pack(side=tk.LEFT, padx=3)
+        self.nav_pos_label = tk.Label(nav_frame, textvariable=self.nav_pos_var, bg="#E6E3D3", font=("Tahoma", 9, "bold"), width=12)
+        self.nav_pos_label.pack(side=tk.LEFT, padx=4)
 
         self.btn_nav_next = tk.Button(nav_frame, text="▶", width=3, command=self.go_next, **nav_opt)
-        self.btn_nav_next.pack(side=tk.LEFT, padx=1, pady=2)
+        self.btn_nav_next.pack(side=tk.LEFT, padx=2, pady=2)
 
         self.btn_nav_last = tk.Button(nav_frame, text="▶|", width=3, command=self.go_last, **nav_opt)
-        self.btn_nav_last.pack(side=tk.LEFT, padx=1, pady=2)
+        self.btn_nav_last.pack(side=tk.LEFT, padx=2, pady=2)
 
         sep = ttk.Separator(nav_frame, orient=tk.VERTICAL)
-        sep.pack(side=tk.LEFT, fill=tk.Y, padx=6, pady=2)
+        sep.pack(side=tk.LEFT, fill=tk.Y, padx=8, pady=2)
 
         tk.Button(nav_frame, text="Добавить", fg="#006600", font=("Tahoma", 8, "bold"),
-                  bg=BTN_BG, relief=tk.GROOVE, bd=1, cursor="hand2", command=self.add_record).pack(side=tk.LEFT, padx=2, pady=2)
-
-        tk.Button(nav_frame, text="Удалить", fg="#CC0000", font=("Tahoma", 8, "bold"),
-                  bg=BTN_BG, relief=tk.GROOVE, bd=1, cursor="hand2", command=self.delete_record).pack(side=tk.LEFT, padx=2, pady=2)
+                  bg=BTN_BG, relief=tk.GROOVE, bd=1, cursor="hand2", padx=6, command=self.add_record).pack(side=tk.LEFT, padx=3, pady=2)
 
         tk.Button(nav_frame, text="Сохранить", fg="#000099", font=("Tahoma", 8, "bold"),
-                  bg=BTN_BG, relief=tk.GROOVE, bd=1, cursor="hand2", command=self.save_record).pack(side=tk.LEFT, padx=2, pady=2)
+                  bg=BTN_BG, relief=tk.GROOVE, bd=1, cursor="hand2", padx=6, command=self.save_record).pack(side=tk.LEFT, padx=3, pady=2)
+
+        tk.Button(nav_frame, text="Удалить", fg="#CC0000", font=("Tahoma", 8, "bold"),
+                  bg=BTN_BG, relief=tk.GROOVE, bd=1, cursor="hand2", padx=6, command=self.delete_record).pack(side=tk.LEFT, padx=3, pady=2)
 
         # Кнопки быстрого перехода ЛР 6: Таблица и Отчет
         tk.Button(nav_frame, text="Отчёт", font=("Tahoma", 8, "bold"), bg="#E2F5E8", fg="#006600",
-                  relief=tk.GROOVE, bd=1, cursor="hand2", padx=6,
-                  command=self.open_report).pack(side=tk.RIGHT, padx=3, pady=2)
+                  relief=tk.GROOVE, bd=1, cursor="hand2", padx=10,
+                  command=self.open_report).pack(side=tk.RIGHT, padx=4, pady=2)
 
         tk.Button(nav_frame, text="Таблица", font=("Tahoma", 8, "bold"), bg="#E2EBF5", fg=HEADER_COLOR,
-                  relief=tk.GROOVE, bd=1, cursor="hand2", padx=6,
-                  command=self.open_table).pack(side=tk.RIGHT, padx=3, pady=2)
+                  relief=tk.GROOVE, bd=1, cursor="hand2", padx=10,
+                  command=self.open_table).pack(side=tk.RIGHT, padx=4, pady=2)
 
         # 2. Заголовок формы (синий крупный заголовок WinForms)
-        lbl_title = tk.Label(self, text=title_text, font=("Tahoma", 13, "bold"), fg=HEADER_COLOR, bg=WIN_BG)
-        lbl_title.pack(pady=(12, 14))
+        lbl_title = tk.Label(self, text=title_text, font=("Tahoma", 14, "bold"), fg=HEADER_COLOR, bg=WIN_BG)
+        lbl_title.pack(pady=(14, 16))
 
         # 3. Область полей ввода
         self.fields_frame = tk.Frame(self, bg=WIN_BG)
-        self.fields_frame.pack(fill=tk.BOTH, expand=True, padx=30, pady=4)
+        self.fields_frame.pack(fill=tk.BOTH, expand=True, padx=40, pady=4)
 
         self.widgets = {}
         for row_idx, cfg in enumerate(self.fields_config):
@@ -87,30 +86,30 @@ class BaseRecordForm(tk.Toplevel):
             label_text = cfg["label"]
             field_type = cfg.get("type", "entry")
 
-            lbl = tk.Label(self.fields_frame, text=label_text, bg=WIN_BG, font=("Tahoma", 9), anchor="e")
-            lbl.grid(row=row_idx, column=0, sticky="e", padx=(0, 10), pady=6)
+            lbl = tk.Label(self.fields_frame, text=label_text + ":", bg=WIN_BG, font=("Tahoma", 9, "bold"), width=22, anchor="e")
+            lbl.grid(row=row_idx, column=0, sticky="e", padx=(0, 14), pady=7)
 
             if field_type == "entry":
                 var = tk.StringVar()
-                entry = tk.Entry(self.fields_frame, textvariable=var, font=("Tahoma", 9), width=34, relief=tk.SUNKEN, bd=1)
+                entry = tk.Entry(self.fields_frame, textvariable=var, font=("Tahoma", 9), width=42, relief=tk.SUNKEN, bd=1)
                 if cfg.get("readonly", False):
                     entry.configure(state="readonly")
-                entry.grid(row=row_idx, column=1, sticky="w", pady=6)
+                entry.grid(row=row_idx, column=1, sticky="w", pady=7)
                 self.widgets[field_name] = {"widget": entry, "var": var, "cfg": cfg}
 
             elif field_type == "combobox":
                 var = tk.StringVar()
                 cb = ttk.Combobox(self.fields_frame, textvariable=var, font=("Tahoma", 9),
-                                  values=cfg.get("values", []), state="readonly", width=32)
-                cb.grid(row=row_idx, column=1, sticky="w", pady=6)
+                                  values=cfg.get("values", []), state="readonly", width=40)
+                cb.grid(row=row_idx, column=1, sticky="w", pady=7)
                 self.widgets[field_name] = {"widget": cb, "var": var, "cfg": cfg}
 
-        # 4. Нижний блок: 7 кнопок ровно в один ряд (без смайликов)
+        # 4. Нижний блок: 7 кнопок ровно в один ряд (широкий и просторный)
         bottom_frame = tk.Frame(self, bg=WIN_BG, relief=tk.GROOVE, bd=2)
-        bottom_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=14, pady=(6, 12))
+        bottom_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=16, pady=(6, 14))
 
         btn_row = tk.Frame(bottom_frame, bg=WIN_BG)
-        btn_row.pack(fill=tk.X, padx=6, pady=8)
+        btn_row.pack(fill=tk.X, padx=8, pady=8)
 
         buttons = [
             ("Первая", self.go_first, False),
@@ -130,12 +129,12 @@ class BaseRecordForm(tk.Toplevel):
                 text=btext,
                 command=bcmd,
                 bg=BTN_BG,
-                font=("Tahoma", 8, f_weight),
+                font=("Tahoma", 9, f_weight),
                 relief=tk.RAISED,
                 bd=1,
                 cursor="hand2",
-                pady=3
-            ).grid(row=0, column=col_idx, padx=2, sticky="ew")
+                pady=4
+            ).grid(row=0, column=col_idx, padx=3, sticky="ew")
 
     def open_table(self):
         TableViewForm(self, initial_table=self.table_name)
@@ -286,9 +285,9 @@ class BaseRecordForm(tk.Toplevel):
 class BooksForm(BaseRecordForm):
     def __init__(self, parent, on_update_callback=None):
         fields = [
-            {"name": "shifr", "label": "Шифр книги", "type": "entry"},
-            {"name": "author", "label": "Автор", "type": "entry"},
-            {"name": "title", "label": "Наименование", "type": "entry"},
+            {"name": "shifr", "label": "Шифр книги (PK)", "type": "entry"},
+            {"name": "author", "label": "Автор произведения", "type": "entry"},
+            {"name": "title", "label": "Наименование книги", "type": "entry"},
             {"name": "publisher", "label": "Издательство", "type": "entry"},
             {"name": "year", "label": "Год издания", "type": "entry", "datatype": "int"},
         ]
@@ -297,9 +296,9 @@ class BooksForm(BaseRecordForm):
 class LibrariesForm(BaseRecordForm):
     def __init__(self, parent, on_update_callback=None):
         fields = [
-            {"name": "number", "label": "Номер филиала", "type": "entry", "datatype": "int"},
+            {"name": "number", "label": "Номер филиала (PK)", "type": "entry", "datatype": "int"},
             {"name": "address", "label": "Адрес филиала", "type": "entry"},
-            {"name": "phone", "label": "Телефон", "type": "entry"},
+            {"name": "phone", "label": "Номер телефона", "type": "entry"},
         ]
         super().__init__(parent, "Таблица \"Библиотеки\"", "libraries", fields, on_update_callback)
 
@@ -312,8 +311,8 @@ class CopiesForm(BaseRecordForm):
         books_key_map = {v: k for k, v in books_map.items()}
 
         fields = [
-            {"name": "id", "label": "Код экземпляра", "type": "entry", "readonly": True},
-            {"name": "lib_number", "label": "Филиал", "type": "combobox",
+            {"name": "id", "label": "Код экземпляра (ID)", "type": "entry", "readonly": True},
+            {"name": "lib_number", "label": "Филиал библиотеки", "type": "combobox",
              "values": list(lib_map.values()), "key_map": lib_key_map, "rev_map": lib_map},
             {"name": "book_shifr", "label": "Книга фонда", "type": "combobox",
              "values": list(books_map.values()), "key_map": books_key_map, "rev_map": books_map},

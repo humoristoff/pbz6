@@ -19,11 +19,11 @@ class WarehouseMainWindow15(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("АСУ «Склад товаров» — Лабораторная работа № 6 (Вариант 15)")
-        self.geometry("540x580")
+        self.geometry("560x610")
         self.configure(bg=BG_MAIN)
         self.resizable(False, False)
 
-        self.center_window(540, 580)
+        self.center_window(560, 610)
         init_db()
 
         self._build_menu()
@@ -85,44 +85,47 @@ class WarehouseMainWindow15(tk.Tk):
 
         stats_hdr = tk.Label(stats_frame, text="Текущее состояние базы данных:",
                              font=("Segoe UI", 9, "bold"), fg=PRIMARY_COLOR, bg=CARD_BG)
-        stats_hdr.pack(anchor="w", padx=12, pady=(8, 4))
+        stats_hdr.pack(anchor="w", padx=12, pady=(6, 2))
 
         self.lbl_stats = tk.Label(stats_frame, text="Загрузка статистики...", font=("Segoe UI", 9),
                                   fg=TEXT_DARK, bg=CARD_BG)
-        self.lbl_stats.pack(anchor="w", padx=12, pady=(0, 8))
+        self.lbl_stats.pack(anchor="w", padx=12, pady=(0, 6))
 
-        # 3. Карточки действий для открытия таблиц и отчетов
+        # 3. Карточки действий для открытия таблиц и отчетов (полноразмерные карточки без обрезки)
         actions_card = tk.Frame(self, bg=CARD_BG, relief=tk.SOLID, bd=1)
         actions_card.pack(fill=tk.BOTH, expand=True, padx=16, pady=6)
 
-        actions_title = tk.Label(actions_card, text="Разделы системы, формы и отчеты:",
+        actions_title = tk.Label(actions_card, text="Разделы системы, экранные формы и отчеты:",
                                  font=("Segoe UI", 10, "bold"), fg=TEXT_DARK, bg=CARD_BG)
-        actions_title.pack(anchor="w", padx=14, pady=(10, 6))
+        actions_title.pack(anchor="w", padx=14, pady=(8, 4))
 
         btns_container = tk.Frame(actions_card, bg=CARD_BG)
-        btns_container.pack(fill=tk.BOTH, expand=True, padx=14, pady=(0, 10))
+        btns_container.pack(fill=tk.BOTH, expand=True, padx=14, pady=(0, 8))
 
         btn_specs = [
             ("Склады предприятия", "Управление складами, адресами и организациями", self.open_sklady, "#0F766E"),
-            ("Производители товаров", "Справочник заводов-изготовителей и стран", self.open_proiz, "#0D9488"),
-            ("Товары на складах", "Поэкземплярный учет номенклатуры, остатков и единиц", self.open_tovary, "#047857"),
-            ("Табличный интерфейс", "Сортировка записей, фильтрация и быстрый контекстный поиск", self.open_table_view, "#0284C7"),
+            ("Производители товаров", "Справочник заводов-изготовителей и стран происхождения", self.open_proiz, "#0D9488"),
+            ("Товары на складах", "Поэкземплярный учет номенклатуры, остатков и единиц хранения", self.open_tovary, "#047857"),
+            ("Табличный интерфейс", "Сортировка записей, гибкая фильтрация и контекстный поиск", self.open_table_view, "#0284C7"),
             ("Генератор отчетов и экспорт", "Построение 4 аналитических отчетов, экспорт в HTML/TXT и печать", self.open_reports, "#0369A1"),
         ]
 
-        for title, subtitle, cmd, color in btn_specs:
-            btn_frame = tk.Frame(btns_container, bg="#F8FAFC", relief=tk.SOLID, bd=1)
-            btn_frame.pack(fill=tk.X, pady=3)
+        for text_main, text_desc, cmd, border_color in btn_specs:
+            btn_box = tk.Frame(btns_container, bg="#F8FAFC", relief=tk.SOLID, bd=1, cursor="hand2")
+            btn_box.pack(fill=tk.X, pady=3)
+            btn_box.bind("<Button-1>", lambda e, c=cmd: c())
 
-            b = tk.Button(btn_frame, text=title, font=("Segoe UI", 9, "bold"),
-                          bg=color, fg="white", activebackground=PRIMARY_COLOR, activeforeground="white",
-                          relief=tk.FLAT, cursor="hand2", padx=10, pady=4, width=24, anchor="w",
-                          command=cmd)
-            b.pack(side=tk.LEFT)
+            lbl_m = tk.Label(btn_box, text=text_main, font=("Segoe UI", 10, "bold"), fg=border_color, bg="#F8FAFC", cursor="hand2")
+            lbl_m.pack(anchor="w", padx=10, pady=(5, 1))
+            lbl_m.bind("<Button-1>", lambda e, c=cmd: c())
 
-            lbl_desc = tk.Label(btn_frame, text=subtitle, font=("Segoe UI", 8),
-                                fg=TEXT_MUTED, bg="#F8FAFC", padx=10)
-            lbl_desc.pack(side=tk.LEFT, fill=tk.X, expand=True, anchor="w")
+            lbl_d = tk.Label(btn_box, text=text_desc, font=("Segoe UI", 8), fg=TEXT_MUTED, bg="#F8FAFC", cursor="hand2")
+            lbl_d.pack(anchor="w", padx=10, pady=(0, 5))
+            lbl_d.bind("<Button-1>", lambda e, c=cmd: c())
+
+            for w in (btn_box, lbl_m, lbl_d):
+                w.bind("<Enter>", lambda e, b=btn_box, m=lbl_m, d=lbl_d: [b.config(bg="#F0FDF4"), m.config(bg="#F0FDF4"), d.config(bg="#F0FDF4")])
+                w.bind("<Leave>", lambda e, b=btn_box, m=lbl_m, d=lbl_d: [b.config(bg="#F8FAFC"), m.config(bg="#F8FAFC"), d.config(bg="#F8FAFC")])
 
         # 4. Кнопка выхода
         btn_exit = tk.Button(self, text="Выход из программы", command=self.destroy,
@@ -145,7 +148,7 @@ class WarehouseMainWindow15(tk.Tk):
             conn.close()
 
             self.lbl_stats.config(
-                text=f"Складов: {cnt_s}  |  Производителей: {cnt_p}  |  Товарных позиций: {cnt_t} (Всего единиц: {sum_kol} шт.)"
+                text=f"Складов: {cnt_s}  |  Производителей: {cnt_p}  |  Товаров: {cnt_t} наим. ({sum_kol} ед.)"
             )
         except Exception:
             pass

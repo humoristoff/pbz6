@@ -16,11 +16,11 @@ class MainWindow(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("База данных \"Библиотека\" (ЛР 6)")
-        self.geometry("460x440")
+        self.geometry("520x480")
         self.configure(bg=WIN_BG)
         self.resizable(False, False)
 
-        self.center_window(460, 440)
+        self.center_window(520, 480)
         init_db()
 
         self._build_menu()
@@ -36,7 +36,6 @@ class MainWindow(tk.Tk):
     def _build_menu(self):
         menubar = tk.Menu(self)
 
-        # Меню Файл
         file_menu = tk.Menu(menubar, tearoff=0)
         file_menu.add_command(label="Табличный вид", command=self.open_table_view)
         file_menu.add_command(label="Генератор отчетов", command=self.open_reports)
@@ -44,14 +43,12 @@ class MainWindow(tk.Tk):
         file_menu.add_command(label="Выход", command=self.destroy)
         menubar.add_cascade(label="Файл", menu=file_menu)
 
-        # Меню Формы
         forms_menu = tk.Menu(menubar, tearoff=0)
         forms_menu.add_command(label="Таблица \"Библиотеки\"", command=self.open_libraries)
         forms_menu.add_command(label="Таблица \"Книги\"", command=self.open_books)
         forms_menu.add_command(label="Таблица \"Экземпляры\"", command=self.open_copies)
         menubar.add_cascade(label="Формы", menu=forms_menu)
 
-        # Меню Отчеты
         rep_menu = tk.Menu(menubar, tearoff=0)
         rep_menu.add_command(label="1. Каталог фонда", command=lambda: self.open_reports(1))
         rep_menu.add_command(label="2. Филиалы библиотек", command=lambda: self.open_reports(2))
@@ -59,7 +56,6 @@ class MainWindow(tk.Tk):
         rep_menu.add_command(label="4. Сводка по издательствам", command=lambda: self.open_reports(4))
         menubar.add_cascade(label="Отчеты", menu=rep_menu)
 
-        # Меню Справка
         help_menu = tk.Menu(menubar, tearoff=0)
         help_menu.add_command(label="О программе", command=self.show_about)
         menubar.add_cascade(label="Справка", menu=help_menu)
@@ -68,7 +64,7 @@ class MainWindow(tk.Tk):
 
     def _build_ui(self):
         outer_frame = tk.Frame(self, bg=WIN_BG, relief=tk.GROOVE, bd=2)
-        outer_frame.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
+        outer_frame.pack(fill=tk.BOTH, expand=True, padx=16, pady=16)
 
         lbl_title = tk.Label(
             outer_frame,
@@ -86,70 +82,62 @@ class MainWindow(tk.Tk):
             fg="#555555",
             bg=WIN_BG
         )
-        lbl_sub.pack(pady=(0, 18))
+        lbl_sub.pack(pady=(0, 16))
 
         btn_style = {
             "font": ("Tahoma", 9),
-            "width": 30,
-            "height": 1,
             "bg": BTN_BG,
             "relief": tk.RAISED,
             "bd": 1,
-            "cursor": "hand2"
+            "cursor": "hand2",
+            "pady": 4
         }
 
-        btn_libs = tk.Button(outer_frame, text="Таблица \"Библиотеки\"", command=self.open_libraries, **btn_style)
-        btn_libs.pack(pady=4)
-
-        btn_books = tk.Button(outer_frame, text="Таблица \"Книги\"", command=self.open_books, **btn_style)
-        btn_books.pack(pady=4)
-
-        btn_copies = tk.Button(outer_frame, text="Таблица \"Экземпляры\"", command=self.open_copies, **btn_style)
-        btn_copies.pack(pady=4)
+        tk.Button(outer_frame, text="Таблица \"Библиотеки\"", command=self.open_libraries, **btn_style).pack(fill=tk.X, padx=45, pady=4)
+        tk.Button(outer_frame, text="Таблица \"Книги\"", command=self.open_books, **btn_style).pack(fill=tk.X, padx=45, pady=4)
+        tk.Button(outer_frame, text="Таблица \"Экземпляры\"", command=self.open_copies, **btn_style).pack(fill=tk.X, padx=45, pady=4)
 
         sep1 = ttk.Separator(outer_frame, orient=tk.HORIZONTAL)
-        sep1.pack(fill=tk.X, padx=30, pady=10)
+        sep1.pack(fill=tk.X, padx=35, pady=10)
 
-        # Кнопка открытия табличного вида с сортировкой и фильтрами
-        btn_grid = tk.Button(
+        # Кнопка открытия табличного вида
+        tk.Button(
             outer_frame,
-            text="Табличный вид (Сортировка/Фильтр/Поиск)",
+            text="Табличный вид (сортировка, фильтр, поиск)",
             command=self.open_table_view,
             font=("Tahoma", 9, "bold"),
-            width=34,
             bg="#E2EBF5",
             relief=tk.RAISED,
             bd=1,
-            cursor="hand2"
-        )
-        btn_grid.pack(pady=4)
+            cursor="hand2",
+            pady=5
+        ).pack(fill=tk.X, padx=45, pady=4)
 
         # Кнопка открытия построителя отчетов
-        btn_rep = tk.Button(
+        tk.Button(
             outer_frame,
             text="Генератор аналитических отчетов",
             command=self.open_reports,
             font=("Tahoma", 9, "bold"),
-            width=34,
             bg="#E2F5E8",
             relief=tk.RAISED,
             bd=1,
-            cursor="hand2"
-        )
-        btn_rep.pack(pady=4)
+            cursor="hand2",
+            pady=5
+        ).pack(fill=tk.X, padx=45, pady=4)
 
         # Кнопка Выход
-        btn_exit = tk.Button(
+        tk.Button(
             outer_frame,
             text="Выход",
             command=self.destroy,
             font=("Tahoma", 9),
-            width=15,
+            width=16,
             bg=BTN_BG,
             relief=tk.RAISED,
-            bd=1
-        )
-        btn_exit.pack(pady=(12, 8))
+            bd=1,
+            pady=3
+        ).pack(pady=(14, 8))
 
     def open_books(self):
         BooksForm(self)
